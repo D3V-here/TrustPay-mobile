@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/trustpay_mobile_dash.html"
+    }
+  ]
+}
