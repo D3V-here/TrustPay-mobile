@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- Mobile app-feel: cover full screen + handle notches via safe-area insets -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="view-transition" content="same-origin" />
+  <title>TrustPay – Wallet</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --sat: env(safe-area-inset-top, 0px);
+      --sar: env(safe-area-inset-right, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --sal: env(safe-area-inset-left, 0px);
+
+      --bn-h: 70px;
+      /* bottom nav base height (without safe-area) */
+    }
+
+    html,
+    body {
+      height: 100%;
+      font-family: 'Inter', sans-serif;
+      background: #F1F3F5;
+      color: #111;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+
+
+
+    /* PAGE */
+    .page {
+      max-width: 760px;
+      margin: 0 auto;
+      padding:
+        18px calc(16px + var(--sar)) calc(18px + var(--bn-h) + var(--sab)) calc(16px + var(--sal));
+      min-height: 100svh;
+    }
+
+    .page-header {
+      margin-bottom: 14px;
+    }
+
+    .breadcrumb {
+      font-size: 0.8rem;
+      color: #9CA3AF;
+      margin-bottom: 4px;
+    }
+
+    .breadcrumb span {
+      color: #F97316;
+      font-weight: 600;
+    }
+
+    .page-title {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #111;
+      letter-spacing: -0.02em;
+    }
+
+    .page-subtitle {
+      font-size: 0.82rem;
+      color: #9CA3AF;
+      margin-top: 4px;
+      line-height: 1.45;
+    }
+
+    /* 3-COLUMN GRID (desktop) -> 1 column (mobile) */
+    .wallet-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    /* BALANCE CARD */
+    .balance-card {
+      background: linear-gradient(135deg, #111827 0%, #1F2937 50%, #111827 100%);
+      border-radius: 20px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      min-height: 172px;
+    }
+
+    .balance-card::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 160px;
+      height: 160px;
+      background: radial-gradient(circle, rgba(249, 115, 22, .25) 0%, transparent 70%);
+    }
+
+    .balance-card::after {
+      content: '';
+      position: absolute;
+      bottom: -50px;
+      left: -20px;
+      width: 140px;
+      height: 140px;
+      background: radial-gradient(circle, rgba(249, 115, 22, .12) 0%, transparent 70%);
+    }
+
+    .bal-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .bal-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, .55);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .bal-logo {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .bal-logo-icon {
+      width: 18px;
+      height: 18px;
+      background: #F97316;
+      clip-path: polygon(0 0, 100% 0, 100% 65%, 50% 100%, 0 65%);
+    }
+
+    .bal-logo-text {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: rgba(255, 255, 255, .7);
+    }
+
+    .bal-amount-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .bal-currency {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, .7);
+    }
+
+    .bal-amount {
+      font-size: 1.85rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -0.02em;
+      transition: filter .3s;
+    }
+
+    .bal-amount.hidden {
+      filter: blur(8px);
+    }
+
+    .bal-eye-btn {
+      background: rgba(255, 255, 255, .12);
+      border: none;
+      border-radius: 10px;
+      width: 34px;
+      height: 34px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, .7);
+      transition: background .15s;
+    }
+
+    .bal-eye-btn:hover {
+      background: rgba(255, 255, 255, .2);
+    }
+
+    .bal-stats {
+      display: flex;
+      gap: 16px;
+    }
+
+    .bal-stat-label {
+      font-size: 0.65rem;
+      color: rgba(255, 255, 255, .45);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .bal-stat-val {
+      font-size: 0.86rem;
+      font-weight: 800;
+      margin-top: 2px;
+    }
+
+    .bal-stat-val.pos {
+      color: #4ADE80;
+    }
+
+    .bal-stat-val.neg {
+      color: #F87171;
+    }
+
+    .btn-check-bal {
+      width: 100%;
+      margin-top: 12px;
+      background: rgba(249, 115, 22, .15);
+      color: #F97316;
+      border: 1.5px solid rgba(249, 115, 22, .3);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: background .15s, border-color .15s;
+    }
+
+    .btn-check-bal:hover {
+      background: rgba(249, 115, 22, .22);
+      border-color: #F97316;
+    }
+
+    /* QUICK ACTIONS */
+    .actions-card {
+      padding: 18px 18px;
+      margin-top: 12px;
+    }
+
+    .actions-title {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #9CA3AF;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 14px;
+    }
+
+    .actions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+      padding: 14px 8px;
+      border-radius: 14px;
+      border: 1.5px solid #F3F4F6;
+      background: #FAFAFA;
+      cursor: pointer;
+      transition: all .15s;
+      user-select: none;
+    }
+
+    .action-btn:hover {
+      border-color: #F97316;
+      background: #FFF7ED;
+    }
+
+    .action-btn:hover .action-icon {
+      background: #F97316;
+      color: #fff;
+    }
+
+    .action-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: #F3F4F6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s, color .15s;
+      color: #6B7280;
+    }
+
+    .action-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .action-label {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: #374151;
+    }
+
+    /* QR */
+    .qr-card {
+      padding: 20px 18px;
+      text-align: center;
+    }
+
+    .qr-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .qr-title {
+      font-size: 1rem;
+      font-weight: 900;
+      color: #111;
+    }
+
+    .qr-status {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #16A34A;
+    }
+
+    .qr-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #22C55E;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: .6;
+        transform: scale(.85)
+      }
+    }
+
+    .qr-frame {
+      display: inline-block;
+      padding: 14px;
+      background: #fff;
+      border: 2px solid #F3F4F6;
+      border-radius: 18px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, .07);
+      margin-bottom: 14px;
+      position: relative;
+      max-width: 100%;
+    }
+
+    .qr-corner {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-color: #F97316;
+      border-style: solid;
+    }
+
+    .qr-corner.tl {
+      top: 4px;
+      left: 4px;
+      border-width: 3px 0 0 3px;
+      border-radius: 4px 0 0 0;
+    }
+
+    .qr-corner.tr {
+      top: 4px;
+      right: 4px;
+      border-width: 3px 3px 0 0;
+      border-radius: 0 4px 0 0;
+    }
+
+    .qr-corner.bl {
+      bottom: 4px;
+      left: 4px;
+      border-width: 0 0 3px 3px;
+      border-radius: 0 0 0 4px;
+    }
+
+    .qr-corner.br {
+      bottom: 4px;
+      right: 4px;
+      border-width: 0 3px 3px 0;
+      border-radius: 0 0 4px 0;
+    }
+
+    canvas#qrCanvas {
+      display: block;
+      width: min(240px, 72vw);
+      height: auto;
+      border-radius: 8px;
+    }
+
+    .qr-upi-label {
+      font-size: 0.72rem;
+      color: #9CA3AF;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .qr-upi-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .qr-upi-id {
+      font-size: 0.95rem;
+      font-weight: 900;
+      color: #111;
+    }
+
+    .btn-copy {
+      background: #F3F4F6;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #6B7280;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all .15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+
+    .btn-copy:hover {
+      background: #FFF7ED;
+      color: #F97316;
+    }
+
+    .btn-copy.copied {
+      background: #DCFCE7;
+      color: #16A34A;
+    }
+
+    .qr-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .qr-action-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1.5px solid #E5E7EB;
+      background: #fff;
+      cursor: pointer;
+      font-size: 0.86rem;
+      font-weight: 800;
+      color: #374151;
+      font-family: 'Inter', sans-serif;
+      transition: all .15s;
+      user-select: none;
+    }
+
+    .qr-action-btn:hover {
+      border-color: #F97316;
+      color: #F97316;
+      background: #FFF7ED;
+    }
+
+    .qr-action-btn svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .qr-note {
+      margin-top: 12px;
+      font-size: 0.75rem;
+      color: #9CA3AF;
+      line-height: 1.5;
+    }
+
+    /* TRANSACTIONS */
+    .tx-card {
+      padding: 18px;
+    }
+
+    .tx-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      gap: 12px;
+    }
+
+    .tx-title {
+      font-size: 1rem;
+      font-weight: 900;
+      color: #111;
+    }
+
+    .tx-link {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #F97316;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .tx-link:hover {
+      text-decoration: underline;
+    }
+
+    .tx-tabs {
+      display: flex;
+      gap: 4px;
+      background: #F3F4F6;
+      padding: 4px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+    }
+
+    .tx-tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      font-size: 0.86rem;
+      font-weight: 800;
+      color: #9CA3AF;
+      border-radius: 9px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: 'Inter', sans-serif;
+      transition: all .18s;
+      user-select: none;
+    }
+
+    .tx-tab.active {
+      background: #fff;
+      color: #F97316;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .1);
+    }
+
+    .tx-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .tx-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 12px;
+      border-radius: 12px;
+      transition: background .15s;
+      cursor: pointer;
+    }
+
+    .tx-row:hover {
+      background: #F9FAFB;
+    }
+
+    .tx-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      font-weight: 900;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .tx-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .tx-name {
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: #111;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tx-desc {
+      font-size: 0.74rem;
+      color: #9CA3AF;
+      margin-top: 2px;
+    }
+
+    .tx-right {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .tx-amount {
+      font-size: 0.92rem;
+      font-weight: 900;
+    }
+
+    .tx-amount.pos {
+      color: #16A34A;
+    }
+
+    .tx-amount.neg {
+      color: #DC2626;
+    }
+
+    .tx-time {
+      font-size: 0.7rem;
+      color: #9CA3AF;
+      margin-top: 2px;
+    }
+
+    .tx-badge {
+      display: inline-block;
+      font-size: 0.62rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 99px;
+      margin-top: 3px;
+    }
+
+    .tx-badge.success {
+      background: #DCFCE7;
+      color: #16A34A;
+    }
+
+    .tx-badge.done {
+      background: #FEF3C7;
+      color: #D97706;
+    }
+
+    .tx-divider {
+      height: 1px;
+      background: #F3F4F6;
+      margin: 4px 0;
+    }
+
+    .tx-view-all {
+      width: 100%;
+      margin-top: 12px;
+      background: none;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: #6B7280;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all .15s;
+      user-select: none;
+    }
+
+    .tx-view-all:hover {
+      border-color: #F97316;
+      color: #F97316;
+      background: #FFF7ED;
+    }
+
+    /* TOAST (sit above bottom-nav) */
+    #toast {
+      position: fixed;
+      bottom: calc(18px + var(--bn-h) + var(--sab));
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      opacity: 0;
+      visibility: hidden;
+      background: #111;
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      z-index: 999;
+      transition: transform .3s cubic-bezier(.22, 1, .36, 1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .25);
+      max-width: min(92vw, 520px);
+    }
+
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Bottom nav (mobile app feel) */
+    .bottom-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 120;
+
+      background: rgba(235, 235, 235, 0.92);
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+
+      padding: 10px calc(12px + var(--sar)) calc(10px + var(--sab)) calc(12px + var(--sal));
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+
+    .bn-item {
+      text-decoration: none;
+      color: #444;
+      font-weight: 900;
+      font-size: 0.86rem;
+      padding: 12px 10px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+
+    .bn-item.active {
+      color: #F97316;
+      background: rgba(249, 115, 22, 0.10);
+    }
+
+    body.dark .bottom-nav {
+      background: rgba(18, 18, 18, 0.92);
+      border-top-color: rgba(255, 255, 255, 0.06);
+    }
+
+    body.dark .bn-item {
+      color: #d1d5db;
+    }
+
+    body.dark .bn-item.active {
+      color: #F97316;
+      background: rgba(249, 115, 22, 0.14);
+    }
+
+    /* Top Header */
+    .top-header {
+      background: rgba(235, 235, 235, 0.92);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: calc(12px + var(--sat)) calc(16px + var(--sar)) 12px calc(16px + var(--sal));
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 900;
+      font-size: 1.15rem;
+      color: #111;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 24px;
+      height: 28px;
+      background: #F97316;
+      clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+      display: inline-block;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="top-header">
+    <a href="trustpay_mobile_dash.html" class="header-brand">
+      <span class="logo-icon"></span> TrustPay
+    </a>
+  </header>
+
+  <div class="page">
+    <div class="page-header">
+      <div class="breadcrumb">Home &rsaquo; <span>Wallet</span></div>
+      <div class="page-title">My Wallet</div>
+      <div class="page-subtitle">Last updated: just now &nbsp;&middot;&nbsp; All transactions are secured</div>
+    </div>
+
+    <div class="wallet-grid">
+
+      <!-- Balance + Actions -->
+      <div>
+        <div class="balance-card">
+          <div class="bal-top">
+            <span class="bal-label">Total Balance</span>
+            <div class="bal-logo">
+              <span class="bal-logo-icon"></span>
+              <span class="bal-logo-text">TrustPay</span>
+            </div>
+          </div>
+
+          <div class="bal-amount-row">
+            <span class="bal-currency">&#8377;</span>
+            <span class="bal-amount hidden" id="balAmount">24,580.75</span>
+            <button class="bal-eye-btn" id="eyeBtn" type="button" aria-label="Show or hide balance">
+              <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75C21.27 8.11 17 5 12 5c-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46A11.8 11.8 0 001 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="bal-stats">
+            <div class="bal-stat">
+              <div class="bal-stat-label">&#8593; Income</div>
+              <div class="bal-stat-val pos">+&#8377;46,200</div>
+            </div>
+            <div class="bal-stat">
+              <div class="bal-stat-label">&#8595; Spent</div>
+              <div class="bal-stat-val neg">-&#8377;6,538</div>            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="card actions-card">
+        <div class="actions-title">Quick Actions</div>
+        <div class="actions-grid">
+          <div class="action-btn" onclick="showToast('Send Money')">
+            <div class="action-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </div>
+            <div class="action-label">Send</div>
+          </div>
+          <div class="action-btn" onclick="showToast('Add Money')">
+            <div class="action-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            </div>
+            <div class="action-label">Add</div>
+          </div>
+          <div class="action-btn" onclick="showToast('Bank Transfer')">
+            <div class="action-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 10h3v7H4zM10.5 10h3v7h-3zM2 19h20v3H2zM17 10h3v7h-3zM12 1L2 6v2h20V6L12 1z" /></svg>
+            </div>
+            <div class="action-label">Bank</div>
+          </div>
+          <div class="action-btn" onclick="showToast('Self Transfer')">
+            <div class="action-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" /></svg>
+            </div>
+            <div class="action-label">Self</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QR -->
+      <div class="card qr-card">
+        <div class="qr-header">
+          <span class="qr-title">Payment QR</span>
+          <span class="qr-status"><span class="qr-dot"></span>Active</span>
+        </div>
+        <div class="qr-frame">
+          <span class="qr-corner tl"></span><span class="qr-corner tr"></span>
+          <span class="qr-corner bl"></span><span class="qr-corner br"></span>
+          <canvas id="qrCanvas" width="200" height="200"></canvas>
+        </div>
+        <div class="qr-upi-label">Your UPI ID</div>
+        <div class="qr-upi-row">
+          <span class="qr-upi-id">dev@trustpay</span>
+          <button class="btn-copy" id="copyBtn" onclick="copyUPI()" type="button">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+            </svg>
+            Copy
+          </button>
+        </div>
+        <div class="qr-actions">
+          <button class="qr-action-btn" onclick="showToast('QR shared!')" type="button">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z" />
+            </svg>
+            Share
+          </button>
+          <button class="qr-action-btn" onclick="showToast('QR downloaded!')" type="button">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+            </svg>
+            Download
+          </button>
+        </div>
+        <p class="qr-note">Scan with any UPI app to pay instantly. Works with PhonePe, GPay, Paytm &amp; more.</p>
+      </div>
+
+      <!-- Transactions -->
+      <div class="card tx-card">
+        <div class="tx-header">
+          <span class="tx-title">Transaction History</span>
+          <a class="tx-link" onclick="showToast('Loading...')">View All</a>
+        </div>
+        <div class="tx-tabs">
+          <button class="tx-tab active" onclick="filterTx(this,'all')" type="button">All</button>
+          <button class="tx-tab" onclick="filterTx(this,'sent')" type="button">Sent</button>
+          <button class="tx-tab" onclick="filterTx(this,'received')" type="button">Received</button>
+        </div>
+        <div class="tx-list" id="txList"></div>
+        <button class="tx-view-all" onclick="showToast('Loading all transactions...')" type="button">View All Transactions</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav" aria-label="Bottom navigation">
+    <a class="bn-item active" href="trustpay_mobile_wallet.html">Wallet</a>
+    <a class="bn-item" href="trustpay_mobile_payments.html">Pay</a>
+    <a class="bn-item" href="trustpay_mobile_subscription.html">Plans</a>
+    <a class="bn-item" href="trustpay_mobile_rewards.html">Rewards</a>
+    <a class="bn-item" href="aboutus.html">About</a>
+  </nav>
+
+  <script>
+    var TXS = [
+      { name: 'Arun Kumar', desc: 'UPI Transfer', amount: +2500, time: '2 hours ago', type: 'received', color: '#6366F1', initials: 'AK' },
+      { name: 'Zomato', desc: 'Food Order #4821', amount: -340, time: 'Yesterday 1:30 PM', type: 'sent', color: '#EF4444', initials: 'Z' },
+      { name: 'Priya Sharma', desc: 'Money Request', amount: +1200, time: 'Yesterday 11 AM', type: 'received', color: '#8B5CF6', initials: 'PS' },
+      { name: 'Amazon Pay', desc: 'Shopping', amount: -899, time: '2 days ago', type: 'sent', color: '#F59E0B', initials: 'A' },
+      { name: 'HDFC Bank', desc: 'Credit Card Bill', amount: -5000, time: '3 days ago', type: 'sent', color: '#3B82F6', initials: 'HB' },
+      { name: 'Salary Credit', desc: 'Monthly Salary', amount: +45000, time: '1 week ago', type: 'received', color: '#22C55E', initials: 'SC' },
+      { name: 'Airtel', desc: 'Mobile Recharge', amount: -299, time: '1 week ago', type: 'sent', color: '#EC4899', initials: 'AI' },
+      { name: 'Swiggy', desc: 'Food Delivery', amount: -465, time: '2 weeks ago', type: 'sent', color: '#F97316', initials: 'SW' },
+    ];
+
+    function renderTx(filter) {
+      var list = document.getElementById('txList');
+      if(!list) return;
+      var data = filter === 'all' ? TXS : TXS.filter(function (t) { return t.type === filter; });
+      list.innerHTML = '';
+      data.forEach(function (tx, i) {
+        var pos = tx.amount > 0;
+        var sign = pos ? '+₹' : '-₹';
+        var abs = Math.abs(tx.amount).toLocaleString('en-IN');
+        var badge = pos ? '<span class="tx-badge success">Received</span>' : '<span class="tx-badge done">Completed</span>';
+        var row = '<div class="tx-row">' +
+          '<div class="tx-avatar" style="background:' + tx.color + '">' + tx.initials + '</div>' +
+          '<div class="tx-info"><div class="tx-name">' + tx.name + '</div><div class="tx-desc">' + tx.desc + '</div></div>' +
+          '<div class="tx-right"><div class="tx-amount ' + (pos ? 'pos' : 'neg') + '">' + sign + abs + '</div>' +
+          '<div class="tx-time">' + tx.time + '</div>' + badge + '</div></div>';
+        if (i < data.length - 1) row += '<div class="tx-divider"></div>';
+        list.innerHTML += row;
+      });
+    }
+
+    function filterTx(btn, filter) {
+      document.querySelectorAll('.tx-tab').forEach(function (t) { t.classList.remove('active'); });
+      if(btn) btn.classList.add('active');
+      renderTx(filter);
+    }
+    window.addEventListener('DOMContentLoaded', () => renderTx('all'));
+
+    var balVisible = false;
+    var eyeBtn = document.getElementById('eyeBtn');
+    if(eyeBtn) {
+      eyeBtn.addEventListener('click', function () {
+        balVisible = !balVisible;
+        document.getElementById('balAmount').classList.toggle('hidden', !balVisible);
+        document.getElementById('eyeIcon').innerHTML = balVisible
+          ? '<path d="M12 5C7 5 2.73 8.11 1 12.5 2.73 16.89 7 20 12 20s9.27-3.11 11-7.5C21.27 8.11 17 5 12 5zm0 12.5a5 5 0 110-10 5 5 0 010 10zm0-8a3 3 0 100 6 3 3 0 000-6z"/>'
+          : '<path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75C21.27 8.11 17 5 12 5c-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46A11.8 11.8 0 001 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>';
+      });
+    }
+
+    var checkBalBtn = document.getElementById('checkBalBtn');
+    if(checkBalBtn) {
+      checkBalBtn.addEventListener('click', function () {
+        balVisible = true;
+        document.getElementById('balAmount').classList.remove('hidden');
+        document.getElementById('eyeIcon').innerHTML = '<path d="M12 5C7 5 2.73 8.11 1 12.5 2.73 16.89 7 20 12 20s9.27-3.11 11-7.5C21.27 8.11 17 5 12 5zm0 12.5a5 5 0 110-10 5 5 0 010 10zm0-8a3 3 0 100 6 3 3 0 000-6z"/>';
+      });
+    }
+
+    function copyTextFallback(text) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) { }
+      document.body.removeChild(ta);
+    }
+
+    function copyUPI() {
+      var upi = 'dev@trustpay';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(upi).catch(function () { copyTextFallback(upi); });
+      } else {
+        copyTextFallback(upi);
+      }
+
+      var btn = document.getElementById('copyBtn');
+      if(btn) {
+        btn.textContent = '✓ Copied';
+        btn.classList.add('copied');
+        setTimeout(function () {
+          btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Copy';
+          btn.classList.remove('copied');
+        }, 2500);
+      }
+    }
+
+    function showToast(msg) {
+      console.log(msg); // Ignored to avoid UI bug
+    }
+
+    (function () {
+      var canvas = document.getElementById('qrCanvas');
+      if(!canvas) return;
+      var ctx = canvas.getContext('2d');
+
+      var SIZE = 200, N = 25, M = SIZE / N;
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, SIZE, SIZE);
+
+        function finder(gx, gy) {
+        ctx.fillStyle = '#111'; ctx.fillRect(gx * M, gy * M, 7 * M, 7 * M);
+        ctx.fillStyle = '#fff'; ctx.fillRect((gx + 1) * M, (gy + 1) * M, 5 * M, 5 * M);
+        ctx.fillStyle = '#111'; ctx.fillRect((gx + 2) * M, (gy + 2) * M, 3 * M, 3 * M);
+        }
+        finder(0, 0); finder(18, 0); finder(0, 18);
+
+        for (var i = 8; i <= 16; i++) { if (i % 2===0) { ctx.fillStyle='#111' ; ctx.fillRect(i * M, 6 * M, M, M);
+          ctx.fillRect(6 * M, i * M, M, M); } } var seed='dev@trustpay@2026' ; function hash(i) { var h=0x811c9dc5; for
+          (var k=0; k < seed.length; k++) h=Math.imul(h ^ seed.charCodeAt(k), 0x01000193); h=Math.imul(h ^ i,
+          0x01000193); h=Math.imul(h ^ (i>> 4), 0x01000193);
+          return ((h >>> 0) & 0xFF) < 108; } function reserved(r, c) { return (r < 9 && c < 9) || (r < 9 && c> 16) || (r
+            > 16 && c < 9) || (r===6 || c===6); } var idx=0; for (var r=0; r < N; r++) for (var c=0; c < N; c++) { if
+              (reserved(r, c)) { idx++; continue; } if (hash(idx++)) { ctx.fillStyle='#111' ; ctx.fillRect(c * M + .3, r
+              * M + .3, M - .6, M - .6); } } var cx=SIZE / 2, cy=SIZE / 2, cr=18; ctx.fillStyle='#fff' ;
+              ctx.beginPath(); ctx.arc(cx, cy, cr + 3, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle='#F97316' ;
+              ctx.beginPath(); ctx.arc(cx, cy, cr, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle='#fff' ;
+              ctx.font='bold 16px Inter' ; ctx.textAlign='center' ; ctx.textBaseline='middle' ; ctx.fillText('₹', cx, cy
+              + 1); })(); renderTx('all'); </script>
+
+</body>
+
+</html>

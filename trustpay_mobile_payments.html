@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <!-- Mobile app-feel: full screen + notches support -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="view-transition" content="same-origin" />
+  <title>TrustPay – Payments</title>
+  <meta name="description" content="Send, receive, and scan payments with TrustPay.">
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,900;1,900&family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --sat: env(safe-area-inset-top, 0px);
+      --sar: env(safe-area-inset-right, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --sal: env(safe-area-inset-left, 0px);
+      --bn-h: 70px;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      background: #f0efed;
+      font-family: 'Inter', sans-serif;
+      min-height: 100svh;
+      overflow-x: hidden;
+      overflow-y: auto;
+      position: relative;
+      -webkit-text-size-adjust: 100%;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      color: #111;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* paper grain */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.028;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+
+
+
+
+    /* ══ PAGE CONTENT ══ */
+    .page-wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding:
+        18px calc(16px + var(--sar)) calc(18px + var(--bn-h) + var(--sab)) calc(16px + var(--sal));
+    }
+
+    .page-title {
+      font-size: 30px;
+      font-weight: 900;
+      color: #0e0e0e;
+      letter-spacing: -1px;
+      margin-bottom: 4px;
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 18px;
+    }
+
+    /* ══ TAB BAR ══ */
+    .tab-bar {
+      display: flex;
+      background: rgba(0, 0, 0, 0.06);
+      border-radius: 16px;
+      padding: 4px;
+      margin-bottom: 18px;
+      position: sticky;
+      top: calc(58px + var(--sat));
+      z-index: 20;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .tab-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 10px 0;
+      border: none;
+      background: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #666;
+      transition: all 0.25s ease;
+      user-select: none;
+    }
+
+    .tab-btn.active {
+      background: #f05a28;
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(240, 90, 40, 0.35);
+    }
+
+    .tab-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* SEND TAB */
+    .section-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 12px;
+    }
+
+    .section-label h3 {
+      font-size: 15px;
+      font-weight: 800;
+      color: #222;
+    }
+
+    .section-label a {
+      font-size: 13px;
+      font-weight: 700;
+      color: #f05a28;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    /* Contacts strip (mobile scroll) */
+    .contacts-strip {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 10px;
+      margin-bottom: 18px;
+      scroll-snap-type: x mandatory;
+    }
+
+    .contact-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+
+      flex: 0 0 auto;
+      width: 76px;
+
+      transition: transform 0.2s;
+      scroll-snap-align: start;
+      user-select: none;
+    }
+
+    .contact-item:hover {
+      transform: translateY(-3px);
+    }
+
+    .contact-item.selected .contact-avatar {
+      box-shadow: 0 0 0 3px #f05a28, 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .contact-avatar {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      position: relative;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+      transition: box-shadow 0.2s;
+    }
+
+    .online-dot {
+      position: absolute;
+      bottom: 1px;
+      right: 1px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #30d158;
+      border: 2px solid #f0efed;
+    }
+
+    .contact-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .contact-amount {
+      font-size: 10px;
+      color: #888;
+    }
+
+    .contact-add .contact-avatar {
+      background: #fff;
+      border: 2px dashed rgba(0, 0, 0, 0.15);
+      color: #f05a28;
+      font-size: 24px;
+      font-weight: 500;
+    }
+
+    /* Search bar */
+    .search-bar {
+      display: flex;
+      align-items: center;
+      background: #e8e7e5;
+      border-radius: 14px;
+      height: 52px;
+      padding: 0 18px;
+      margin-bottom: 18px;
+      gap: 12px;
+      transition: box-shadow 0.2s;
+    }
+
+    .search-bar:focus-within {
+      box-shadow: 0 0 0 2px rgba(240, 90, 40, 0.35);
+    }
+
+    .search-bar svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      color: #aaa;
+    }
+
+    .search-bar input {
+      flex: 1;
+      border: none;
+      background: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      /* prevents iOS focus zoom */
+      color: #222;
+      outline: none;
+    }
+
+    .search-bar input::placeholder {
+      color: #bbb;
+    }
+
+    /* Quick Transfer Card */
+    .transfer-card {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(20px) saturate(1.6);
+      -webkit-backdrop-filter: blur(20px) saturate(1.6);
+      border-radius: 22px;
+      padding: 22px 18px;
+      margin-bottom: 12px;
+      text-align: center;
+      box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.10),
+        inset 0 1px 0 rgba(255, 255, 255, 0.80);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+    }
+
+    .transfer-to {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 6px;
+    }
+
+    .transfer-recipient {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .transfer-recipient .mini-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .transfer-recipient span {
+      font-size: 16px;
+      font-weight: 800;
+      color: #111;
+    }
+
+    .transfer-amount {
+      font-size: 40px;
+      font-weight: 900;
+      color: #0e0e0e;
+      letter-spacing: -2px;
+      margin-bottom: 4px;
+    }
+
+    .transfer-dots {
+      font-size: 18px;
+      color: #ccc;
+      letter-spacing: 6px;
+      margin-bottom: 14px;
+    }
+
+    .amount-bar {
+      height: 4px;
+      background: #e8e7e5;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 0;
+    }
+
+    .amount-bar-fill {
+      height: 100%;
+      width: 48%;
+      background: linear-gradient(90deg, #f05a28, #ff7040);
+      border-radius: 2px;
+    }
+
+    /* Quick amount chips */
+    .amount-chips {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      padding: 9px 18px;
+      border-radius: 10px;
+      background: #e8e7e5;
+      border: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #555;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .chip:hover {
+      background: #ddd;
+    }
+
+    .chip.active {
+      background: #f05a28;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(240, 90, 40, 0.30);
+    }
+
+    /* Send button */
+    .send-btn {
+      display: flex;
+      width: 100%;
+      height: 58px;
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      border: none;
+      background: none;
+      padding: 0;
+      position: relative;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      transition: box-shadow 0.2s, transform 0.2s;
+      user-select: none;
+    }
+
+    .send-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+    }
+
+    .send-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    .send-btn-label {
+      flex: 1;
+      background: #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      border-radius: 16px 0 0 16px;
+    }
+
+    .send-btn-icon {
+      width: 58px;
+      background: #f05a28;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border-radius: 0 16px 16px 0;
+    }
+
+    /* RECEIVED TAB */
+    .summary-card {
+      background: linear-gradient(135deg, #00b887, #007a5a);
+      border-radius: 20px;
+      padding: 22px 18px;
+      margin-bottom: 18px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 12px 36px rgba(0, 120, 80, 0.25);
+    }
+
+    .summary-card::before {
+      content: '';
+      position: absolute;
+      top: -30px;
+      right: -30px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      pointer-events: none;
+    }
+
+    .summary-label {
+      font-size: 12px;
+      opacity: 0.75;
+      margin-bottom: 6px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .summary-amount {
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      margin-bottom: 4px;
+    }
+
+    .summary-sub {
+      font-size: 12px;
+      opacity: 0.65;
+    }
+
+    /* Filter chips */
+    .filter-chips {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 4px;
+    }
+
+    .filter-chip {
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: #e8e7e5;
+      border: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .filter-chip.active {
+      background: #f05a28;
+      color: #fff;
+    }
+
+    /* Transaction list */
+    .tx-list {
+      list-style: none;
+    }
+
+    .tx-row {
+      display: flex;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      gap: 14px;
+      cursor: pointer;
+      transition: background 0.15s;
+      border-radius: 12px;
+      padding-left: 8px;
+      padding-right: 8px;
+      user-select: none;
+    }
+
+    .tx-row:hover {
+      background: rgba(0, 0, 0, 0.025);
+    }
+
+    .tx-row:last-child {
+      border-bottom: none;
+    }
+
+    .tx-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .tx-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .tx-name {
+      font-size: 15px;
+      font-weight: 800;
+      color: #111;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tx-detail {
+      font-size: 12px;
+      color: #999;
+    }
+
+    .tx-right {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .tx-amount {
+      font-size: 16px;
+      font-weight: 900;
+      color: #30d158;
+      margin-bottom: 2px;
+      white-space: nowrap;
+    }
+
+    .tx-amount.sent {
+      color: #ff3b30;
+    }
+
+    .tx-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .badge-success {
+      background: rgba(48, 209, 88, 0.12);
+      color: #30d158;
+    }
+
+    .badge-pending {
+      background: rgba(255, 159, 10, 0.12);
+      color: #ff9f0a;
+    }
+
+    .tx-chevron {
+      color: #ccc;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    /* SCANNER TAB */
+    .scanner-wrap {
+      position: relative;
+      background: #0a0a0a;
+      border-radius: 24px;
+      overflow: hidden;
+      aspect-ratio: 9 / 14;
+      max-height: 620px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .scanner-wrap video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.85;
+    }
+
+    .scanner-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: calc(14px + var(--sat)) 16px 12px;
+      z-index: 10;
+    }
+
+    .scanner-close,
+    .scanner-torch {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.20);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #fff;
+      font-size: 18px;
+      text-decoration: none;
+      user-select: none;
+    }
+
+    .scanner-title {
+      color: #fff;
+      font-size: 17px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    /* QR Frame */
+    .qr-frame {
+      position: relative;
+      width: min(240px, 72vw);
+      height: min(240px, 72vw);
+      z-index: 10;
+    }
+
+    .qr-corner {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+    }
+
+    .qr-corner::before,
+    .qr-corner::after {
+      content: '';
+      position: absolute;
+      background: #fff;
+      border-radius: 2px;
+    }
+
+    .qr-corner.tl {
+      top: 0;
+      left: 0;
+    }
+
+    .qr-corner.tl::before {
+      top: 0;
+      left: 0;
+      width: 32px;
+      height: 4px;
+    }
+
+    .qr-corner.tl::after {
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 32px;
+    }
+
+    .qr-corner.tr {
+      top: 0;
+      right: 0;
+    }
+
+    .qr-corner.tr::before {
+      top: 0;
+      right: 0;
+      width: 32px;
+      height: 4px;
+    }
+
+    .qr-corner.tr::after {
+      top: 0;
+      right: 0;
+      width: 4px;
+      height: 32px;
+    }
+
+    .qr-corner.bl {
+      bottom: 0;
+      left: 0;
+    }
+
+    .qr-corner.bl::before {
+      bottom: 0;
+      left: 0;
+      width: 32px;
+      height: 4px;
+    }
+
+    .qr-corner.bl::after {
+      bottom: 0;
+      left: 0;
+      width: 4px;
+      height: 32px;
+    }
+
+    .qr-corner.br {
+      bottom: 0;
+      right: 0;
+    }
+
+    .qr-corner.br::before {
+      bottom: 0;
+      right: 0;
+      width: 32px;
+      height: 4px;
+    }
+
+    .qr-corner.br::after {
+      bottom: 0;
+      right: 0;
+      width: 4px;
+      height: 32px;
+    }
+
+    .scan-line {
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(240, 90, 40, 0.9), transparent);
+      box-shadow: 0 0 12px rgba(240, 90, 40, 0.6);
+      border-radius: 1px;
+      animation: scanMove 2.4s ease-in-out infinite;
+    }
+
+    @keyframes scanMove {
+
+      0%,
+      100% {
+        top: 12px;
+      }
+
+      50% {
+        top: calc(100% - 12px);
+      }
+    }
+
+    .scanner-hint {
+      position: absolute;
+      bottom: 140px;
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 13px;
+      z-index: 10;
+      text-align: center;
+      padding: 0 14px;
+    }
+
+    .scanner-panel {
+      position: absolute;
+      bottom: 20px;
+      left: 16px;
+      right: 16px;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.20);
+      border-radius: 18px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      z-index: 10;
+    }
+
+    .scanner-opt {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 6px 0;
+      user-select: none;
+    }
+
+    .scanner-divider {
+      width: 1px;
+      height: 28px;
+      background: rgba(255, 255, 255, 0.20);
+    }
+
+    .camera-fallback {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+      text-align: center;
+      z-index: 10;
+      padding: 0 24px;
+      line-height: 1.6;
+    }
+
+    .camera-fallback svg {
+      display: block;
+      margin: 0 auto 12px;
+      opacity: 0.5;
+    }
+
+    .scanner-permission {
+      position: absolute;
+      top: calc(64px + var(--sat));
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.10);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.65);
+      z-index: 10;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    /* Bottom nav */
+    .bottom-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 120;
+
+      background: rgba(235, 235, 235, 0.92);
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+
+      padding: 10px calc(12px + var(--sar)) calc(10px + var(--sab)) calc(12px + var(--sal));
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+
+    .bn-item {
+      text-decoration: none;
+      color: #444;
+      font-weight: 900;
+      font-size: 0.86rem;
+      padding: 12px 10px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .bn-item.active {
+      color: #F97316;
+      background: rgba(249, 115, 22, 0.10);
+    }
+
+    body.dark .bottom-nav {
+      background: rgba(18, 18, 18, 0.92);
+      border-top-color: rgba(255, 255, 255, 0.06);
+    }
+
+    body.dark .bn-item {
+      color: #d1d5db;
+    }
+
+    body.dark .bn-item.active {
+      color: #F97316;
+      background: rgba(249, 115, 22, 0.14);
+    }
+
+    /* Mobile: hide desktop nav links */
+    @media (max-width: 920px) {
+      .nav-links {
+        display: none;
+      }
+
+      .nav-right {
+        width: auto;
+      }
+    }
+
+    /* Top Header */
+    .top-header {
+      background: rgba(235, 235, 235, 0.92);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: calc(12px + var(--sat)) calc(16px + var(--sar)) 12px calc(16px + var(--sal));
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 900;
+      font-size: 1.15rem;
+      color: #111;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 24px;
+      height: 28px;
+      background: #F97316;
+      clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    
+  </style>
+</head>
+
+<body>
+
+  <!-- ══ TOP NAV ══ -->
+  <header class="top-header">
+    <a href="trustpay_mobile_dash.html" class="header-brand">
+      <span class="logo-icon"></span> TrustPay
+    </a>
+  </header>
+
+  <!-- ══ PAGE ══ -->
+  <main class="page-wrap">
+    <h1 class="page-title">Payments</h1>
+    <p class="page-subtitle">What would you like to do?</p>
+
+    <!-- TAB BAR -->
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="send" type="button">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M4 16L16 4M16 4H6M16 4V14" />
+        </svg>
+        Send
+      </button>
+      <button class="tab-btn" data-tab="received" type="button">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M16 4L4 16M4 16H14M4 16V6" />
+        </svg>
+        Received
+      </button>
+      <button class="tab-btn" data-tab="scanner" type="button">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <rect x="3" y="3" width="5" height="5" />
+          <rect x="12" y="3" width="5" height="5" />
+          <rect x="3" y="12" width="5" height="5" />
+          <path d="M12 12h5v5" />
+        </svg>
+        Scanner
+      </button>
+    </div>
+
+    <!-- ══════════════ SEND TAB ══════════════ -->
+    <div class="tab-panel active" id="panel-send">
+      <div class="section-label">
+        <h3>Recent Contacts</h3>
+        <a href="#" onclick="return false;">See all</a>
+      </div>
+
+      <div class="contacts-strip" id="contactsStrip">
+        <div class="contact-item selected" data-name="Arjun" data-initials="AK"
+          data-color="linear-gradient(135deg,#667eea,#764ba2)">
+          <div class="contact-avatar" style="background:linear-gradient(135deg,#667eea,#764ba2)">
+            AK
+            <div class="online-dot"></div>
+          </div>
+          <span class="contact-name">Arjun</span>
+          <span class="contact-amount">₹2,400</span>
+        </div>
+        <div class="contact-item" data-name="Priya" data-initials="PS"
+          data-color="linear-gradient(135deg,#ff6b6b,#ee5a24)">
+          <div class="contact-avatar" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24)">PS</div>
+          <span class="contact-name">Priya</span>
+          <span class="contact-amount">₹800</span>
+        </div>
+        <div class="contact-item" data-name="Rahul" data-initials="RV"
+          data-color="linear-gradient(135deg,#0abde3,#006266)">
+          <div class="contact-avatar" style="background:linear-gradient(135deg,#0abde3,#006266)">RV</div>
+          <span class="contact-name">Rahul</span>
+          <span class="contact-amount">₹5,000</span>
+        </div>
+        <div class="contact-item" data-name="Meera" data-initials="MM"
+          data-color="linear-gradient(135deg,#f9ca24,#f0932b)">
+          <div class="contact-avatar" style="background:linear-gradient(135deg,#f9ca24,#f0932b)">MM</div>
+          <span class="contact-name">Meera</span>
+          <span class="contact-amount">₹1,200</span>
+        </div>
+        <div class="contact-item contact-add">
+          <div class="contact-avatar">+</div>
+          <span class="contact-name">Add New</span>
+          <span class="contact-amount">&nbsp;</span>
+        </div>
+      </div>
+
+      <div class="search-bar">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="9" cy="9" r="6" />
+          <path d="M13.5 13.5L18 18" />
+        </svg>
+        <input type="text" id="searchInput" placeholder="Search by name or phone number...">
+      </div>
+
+      <div class="section-label">
+        <h3>Quick Transfer</h3>
+      </div>
+
+      <div class="transfer-card">
+        <div class="transfer-to">Send to</div>
+        <div class="transfer-recipient">
+          <div class="mini-avatar" id="recipientAvatar" style="background:linear-gradient(135deg,#667eea,#764ba2)">AK
+          </div>
+          <span id="recipientName">Arjun Kumar</span>
+        </div>
+        <div class="transfer-amount" id="transferAmount">₹ 2,400</div>
+        <div class="transfer-dots">····</div>
+        <div class="amount-bar">
+          <div class="amount-bar-fill"></div>
+        </div>
+      </div>
+
+      <div class="amount-chips">
+        <button class="chip" data-amount="500" type="button">₹500</button>
+        <button class="chip" data-amount="1000" type="button">₹1,000</button>
+        <button class="chip active" data-amount="2500" type="button">₹2,500</button>
+        <button class="chip" data-amount="5000" type="button">₹5,000</button>
+      </div>
+
+      <button class="send-btn" aria-label="Send Money" type="button">
+        <div class="send-btn-label">Send Money</div>
+        <div class="send-btn-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M4 16L16 4M16 4H6M16 4V14" stroke="#fff" stroke-width="2.2" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </div>
+      </button>
+    </div>
+
+    <!-- ══════════════ RECEIVED TAB ══════════════ -->
+    <div class="tab-panel" id="panel-received">
+      <div class="summary-card">
+        <div class="summary-label">Total Received</div>
+        <div class="summary-amount">₹8,520</div>
+        <div class="summary-sub">This month · 4 transactions</div>
+      </div>
+
+      <div class="filter-chips">
+        <button class="filter-chip active" type="button">All</button>
+        <button class="filter-chip" type="button">Received</button>
+        <button class="filter-chip" type="button">Sent</button>
+        <button class="filter-chip" type="button">Pending</button>
+      </div>
+
+      <ul class="tx-list">
+        <li class="tx-row">
+          <div class="tx-avatar" style="background:linear-gradient(135deg,#667eea,#764ba2)">AK</div>
+          <div class="tx-info">
+            <div class="tx-name">Arjun Kumar</div>
+            <div class="tx-detail">UPI Transfer · Today 2:34 PM</div>
+          </div>
+          <div class="tx-right">
+            <div class="tx-amount">+₹2,400</div>
+            <span class="tx-badge badge-success">✓ Success</span>
+          </div>
+          <span class="tx-chevron">›</span>
+        </li>
+
+        <li class="tx-row">
+          <div class="tx-avatar" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24)">PS</div>
+          <div class="tx-info">
+            <div class="tx-name">Priya Sharma</div>
+            <div class="tx-detail">PhonePe · Yesterday</div>
+          </div>
+          <div class="tx-right">
+            <div class="tx-amount">+₹800</div>
+            <span class="tx-badge badge-success">✓ Success</span>
+          </div>
+          <span class="tx-chevron">›</span>
+        </li>
+
+        <li class="tx-row">
+          <div class="tx-avatar" style="background:linear-gradient(135deg,#0abde3,#006266)">RV</div>
+          <div class="tx-info">
+            <div class="tx-name">Rahul Verma</div>
+            <div class="tx-detail">UPI · 2 days ago</div>
+          </div>
+          <div class="tx-right">
+            <div class="tx-amount">+₹5,000</div>
+            <span class="tx-badge badge-success">✓ Success</span>
+          </div>
+          <span class="tx-chevron">›</span>
+        </li>
+
+        <li class="tx-row">
+          <div class="tx-avatar" style="background:linear-gradient(135deg,#aaa,#888)">?</div>
+          <div class="tx-info">
+            <div class="tx-name">Unknown Sender</div>
+            <div class="tx-detail">Bank Transfer · 3 days ago</div>
+          </div>
+          <div class="tx-right">
+            <div class="tx-amount">+₹320</div>
+            <span class="tx-badge badge-pending">Pending</span>
+          </div>
+          <span class="tx-chevron">›</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- ══════════════ SCANNER TAB ══════════════ -->
+    <div class="tab-panel" id="panel-scanner">
+      <div class="scanner-wrap">
+        <video id="cameraFeed" autoplay playsinline muted></video>
+
+        <div class="camera-fallback" id="cameraFallback" style="display:none;">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2">
+            <rect x="4" y="10" width="40" height="28" rx="4" />
+            <circle cx="24" cy="24" r="8" />
+            <circle cx="24" cy="24" r="3" />
+          </svg>
+          Camera access required to scan QR codes.<br>
+          Please allow camera permission and reload.
+        </div>
+
+        <div class="scanner-header">
+          <a href="payments.html" class="scanner-close" aria-label="Close scanner">✕</a>
+          <span class="scanner-title">Scan QR Code</span>
+          <button class="scanner-torch" id="torchBtn" type="button" aria-label="Torch">🔦</button>
+        </div>
+
+        <div class="scanner-permission" id="permBadge">🔒 Camera permission active</div>
+
+        <div class="qr-frame">
+          <div class="qr-corner tl"></div>
+          <div class="qr-corner tr"></div>
+          <div class="qr-corner bl"></div>
+          <div class="qr-corner br"></div>
+          <div class="scan-line"></div>
+        </div>
+
+        <div class="scanner-hint">Align QR code within the frame</div>
+
+        <div class="scanner-panel">
+          <div class="scanner-opt">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.5"
+              stroke-linecap="round">
+              <rect x="2" y="4" width="12" height="10" rx="2" />
+              <path d="M5 4V3a3 3 0 0 1 6 0v1" />
+            </svg>
+            Enter UPI ID
+          </div>
+          <div class="scanner-divider"></div>
+          <div class="scanner-opt">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.5"
+              stroke-linecap="round">
+              <rect x="2" y="2" width="12" height="12" rx="2" />
+              <circle cx="6" cy="6" r="1.5" fill="#fff" stroke="none" />
+              <path d="M2 11l3-3 2 2 3-4 4 5" />
+            </svg>
+            Upload from Gallery
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav" aria-label="Bottom navigation">
+    <a class="bn-item" href="trustpay_mobile_wallet.html">Wallet</a>
+    <a class="bn-item active" href="trustpay_mobile_payments.html">Pay</a>
+    <a class="bn-item" href="trustpay_mobile_subscription.html">Plans</a>
+    <a class="bn-item" href="trustpay_mobile_rewards.html">Rewards</a>
+    <a class="bn-item" href="aboutus.html">About</a>
+  </nav>
+
+  <script>
+    // ══ TAB SWITCHING ══
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.tab-panel');
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.tab;
+
+        tabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        panels.forEach(p => p.classList.remove('active'));
+        document.getElementById('panel-' + target).classList.add('active');
+
+        if (target === 'scanner') startCamera();
+        else stopCamera();
+      });
+    });
+
+    // ══ CONTACT SELECTION ══
+    const contacts = document.querySelectorAll('.contact-item:not(.contact-add)');
+    const recipientAvatar = document.getElementById('recipientAvatar');
+    const recipientName = document.getElementById('recipientName');
+    const fullNames = {
+      'Arjun': 'Arjun Kumar',
+      'Priya': 'Priya Sharma',
+      'Rahul': 'Rahul Verma',
+      'Meera': 'Meera Menon'
+    };
+
+    contacts.forEach(c => {
+      c.addEventListener('click', () => {
+        contacts.forEach(x => x.classList.remove('selected'));
+        c.classList.add('selected');
+
+        const name = c.dataset.name;
+        const initials = c.dataset.initials;
+        const color = c.dataset.color;
+
+        recipientAvatar.textContent = initials;
+        recipientAvatar.style.background = color;
+        recipientName.textContent = fullNames[name] || name;
+      });
+    });
+
+    // ══ SEARCH FILTER ══
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', () => {
+      const q = searchInput.value.toLowerCase();
+      const strip = document.getElementById('contactsStrip');
+      strip.querySelectorAll('.contact-item').forEach(item => {
+        const name = (item.dataset.name || '').toLowerCase();
+        if (item.classList.contains('contact-add')) {
+          item.style.display = '';
+          return;
+        }
+        item.style.display = name.includes(q) ? '' : 'none';
+      });
+    });
+
+    // ══ AMOUNT CHIPS ══
+    const chips = document.querySelectorAll('.chip');
+    const transferAmount = document.getElementById('transferAmount');
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        chips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        const val = parseInt(chip.dataset.amount).toLocaleString('en-IN');
+        transferAmount.textContent = '₹ ' + val;
+      });
+    });
+
+    // ══ FILTER CHIPS (Received) ══
+    const filterChips = document.querySelectorAll('.filter-chip');
+    filterChips.forEach(fc => {
+      fc.addEventListener('click', () => {
+        filterChips.forEach(c => c.classList.remove('active'));
+        fc.classList.add('active');
+      });
+    });
+
+    // ══ CAMERA / SCANNER ══
+    let cameraStream = null;
+    const video = document.getElementById('cameraFeed');
+    const fallback = document.getElementById('cameraFallback');
+    const permBadge = document.getElementById('permBadge');
+
+    async function startCamera() {
+      try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' }
+        });
+        video.srcObject = cameraStream;
+        video.style.display = 'block';
+        fallback.style.display = 'none';
+        permBadge.textContent = '🔒 Camera permission active';
+        permBadge.style.display = '';
+      } catch (err) {
+        video.style.display = 'none';
+        fallback.style.display = '';
+        permBadge.textContent = '⚠ Camera access denied';
+      }
+    }
+
+    function stopCamera() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(t => t.stop());
+        cameraStream = null;
+        video.srcObject = null;
+      }
+    }
+  </script>
+
+
+</body>
+
+</html>

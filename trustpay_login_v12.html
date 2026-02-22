@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Mobile: use viewport-fit=cover + safe-area insets for notch/home indicator layouts -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="view-transition" content="same-origin" />
+  <title>TrustPay – Secure Login</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet" />
+
+  <style>
+    *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+
+    :root{
+      --sat: env(safe-area-inset-top, 0px);
+      --sar: env(safe-area-inset-right, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --sal: env(safe-area-inset-left, 0px);
+    }
+
+    html, body{
+      height:100%;
+      font-family:'Inter', sans-serif;
+      background:#EBEBEB;
+      /* Desktop used overflow:hidden; mobile needs scroll when keyboard opens */
+      overflow-x:hidden;
+      overflow-y:auto;
+    }
+
+    #rain-canvas{
+      position:fixed;
+      inset:0;
+      width:100%;
+      height:100%;
+      z-index:0;
+      pointer-events:none;
+    }
+
+    .layout{
+      position:relative;
+      z-index:1;
+      min-height:100svh;
+      display:flex;
+      flex-direction:column;
+    }
+
+    nav{
+      flex-shrink:0;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: calc(12px + var(--sat)) calc(16px + var(--sar)) 12px calc(16px + var(--sal));
+      background: rgba(235,235,235,0.92);
+      border-bottom:1px solid rgba(0,0,0,0.06);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .logo{
+      display:flex;
+      align-items:center;
+      gap:9px;
+      font-size:1.15rem;
+      font-weight:900;
+      color:#111;
+      text-decoration:none;
+    }
+
+    .logo-icon{
+      width:26px; height:26px;
+      background:#F97316;
+      flex-shrink:0;
+      clip-path: polygon(0 0,100% 0,100% 65%,50% 100%,0 65%);
+    }
+
+    .nav-links{ display:flex; gap:32px; list-style:none; }
+    .nav-links a{
+      font-size:0.85rem;
+      font-weight:500;
+      color:#444;
+      text-decoration:none;
+      transition: color .2s;
+      white-space:nowrap;
+    }
+    .nav-links a:hover{ color:#F97316; }
+    .has-arrow::after{ content:" \00a0\25be"; font-size:0.68rem; opacity:.55; }
+
+    .nav-right{
+      width:120px;
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+    }
+
+    .theme-toggle{
+      background:none;
+      border:none;
+      cursor:pointer;
+      color:#444;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:36px;
+      height:36px;
+      border-radius:50%;
+      transition: background 0.2s, color 0.2s;
+    }
+    .theme-toggle:hover{ background: rgba(0,0,0,0.05); color:#F97316; }
+    .theme-toggle svg{ width:20px; height:20px; }
+
+    /* Dark Theme */
+    body.dark{ background:#121212; }
+    body.dark nav{
+      background: rgba(18,18,18,0.92);
+      border-bottom-color: rgba(255,255,255,0.06);
+    }
+    body.dark .logo{ color:#f3f4f6; }
+    body.dark .nav-links a{ color:#d1d5db; }
+    body.dark .nav-links a:hover{ color:#F97316; }
+    body.dark .theme-toggle{ color:#d1d5db; }
+    body.dark .theme-toggle:hover{ background: rgba(255,255,255,0.1); color:#F97316; }
+
+    body.dark .card{
+      background:#1e1e1e;
+      box-shadow:0 16px 56px rgba(0,0,0,0.4);
+    }
+    body.dark .card-logo-text,
+    body.dark .card h1{ color:#f3f4f6; }
+    body.dark .card-subtitle{ color:#9ca3af; }
+    body.dark label,
+    body.dark .checkbox-label{ color:#d1d5db; }
+    body.dark input[type=email],
+    body.dark input[type=password],
+    body.dark input[type=text]{
+      background:#2d2d2d;
+      border-color:#404040;
+      color:#f3f4f6;
+    }
+    body.dark input:focus{
+      background:#1e1e1e;
+      border-color:#F97316;
+    }
+    body.dark .btn-login{ background:#f97316; color:#fff; }
+    body.dark .btn-login::after{ border-color: transparent transparent #cc5500 transparent; }
+    body.dark .trust-item span{ color:#9ca3af; }
+    body.dark .t-icon{ background: rgba(249,115,22,0.1); }
+    body.dark .divider{ background:#333; }
+    body.dark .card-footer{ color:#9ca3af; }
+
+    .center{
+      flex:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 18px calc(18px + var(--sar)) calc(18px + var(--sab)) calc(18px + var(--sal));
+    }
+
+    .card{
+      background:#fff;
+      border-radius:20px;
+      box-shadow:0 16px 56px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+      width:432px;
+      max-width: 92vw;
+      padding:32px 40px 28px;
+      animation: fadeUp .55s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes fadeUp{
+      from{ opacity:0; transform: translateY(24px); }
+      to{ opacity:1; transform: translateY(0); }
+    }
+
+    .card-logo{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:18px;
+    }
+    .card-logo-icon{
+      width:22px; height:22px;
+      background:#F97316;
+      flex-shrink:0;
+      clip-path: polygon(0 0,100% 0,100% 65%,50% 100%,0 65%);
+    }
+    .card-logo-text{
+      font-weight:900;
+      font-size:1.05rem;
+      color:#111;
+    }
+
+    .card h1{
+      font-size:1.5rem;
+      font-weight:900;
+      color:#111;
+      line-height:1.2;
+      margin-bottom:6px;
+      letter-spacing:-0.022em;
+    }
+    .card h1 span{ color:#F97316; }
+
+    .card-subtitle{
+      font-size:0.78rem;
+      color:#6B7280;
+      line-height:1.55;
+      margin-bottom:20px;
+    }
+
+    .field{ margin-bottom:12px; }
+
+    label{
+      display:block;
+      font-size:0.74rem;
+      font-weight:600;
+      color:#374151;
+      margin-bottom:5px;
+    }
+
+    .input-wrap{
+      position:relative;
+      display:flex;
+      align-items:center;
+    }
+
+    input[type=email],
+    input[type=password],
+    input[type=text]{
+      width:100%;
+      padding: 11px 44px 11px 14px;
+      border: 1.5px solid #E5E7EB;
+      border-radius:11px;
+
+      /* Mobile: prevent iOS focus-zoom by keeping input font-size >= 16px */
+      font-size:16px;
+
+      font-family:'Inter', sans-serif;
+      color:#111;
+      background:#FAFAFA;
+      outline:none;
+      transition:border-color .2s, box-shadow .2s;
+    }
+    input:focus{
+      border-color:#F97316;
+      box-shadow:0 0 0 3px rgba(249,115,22,.13);
+      background:#fff;
+    }
+
+    .eye-btn{
+      position:absolute;
+      right:12px;
+      background:none;
+      border:none;
+      cursor:pointer;
+      padding:0;
+      display:flex;
+      align-items:center;
+      color:#9CA3AF;
+      transition: color .2s;
+    }
+    .eye-btn:hover{ color:#F97316; }
+
+    .options{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin:14px 0 18px;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .checkbox-label{
+      display:flex;
+      align-items:center;
+      gap:7px;
+      font-size:0.76rem;
+      color:#374151;
+      cursor:pointer;
+      user-select:none;
+    }
+    .checkbox-label input[type=checkbox]{
+      width:14px; height:14px;
+      accent-color:#F97316;
+      cursor:pointer;
+    }
+
+    .forgot{
+      font-size:0.76rem;
+      color:#F97316;
+      text-decoration:none;
+      font-weight:600;
+    }
+    .forgot:hover{ opacity:.75; }
+
+    .btn-login{
+      width:100%;
+      padding:13px 20px;
+      background:#111;
+      color:#fff;
+      border:none;
+      border-radius:12px;
+      font-size:0.92rem;
+      font-weight:700;
+      font-family:'Inter', sans-serif;
+      cursor:pointer;
+      position:relative;
+      overflow:hidden;
+      transition: transform .18s, box-shadow .18s;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-login::after{
+      content:'';
+      position:absolute;
+      bottom:0; right:0;
+      width:0; height:0;
+      border-style:solid;
+      border-width:0 0 42px 42px;
+      border-color: transparent transparent #F97316 transparent;
+      border-bottom-right-radius:12px;
+    }
+    .btn-login:hover{
+      transform: translateY(-2px);
+      box-shadow:0 10px 28px rgba(0,0,0,0.20);
+    }
+    .btn-login:active{
+      transform: translateY(0);
+      box-shadow:none;
+    }
+
+    .btn-login svg{ width:16px; height:16px; fill:#fff; flex-shrink:0; }
+
+    .trust-row{
+      display:flex;
+      justify-content:space-between;
+      margin-top:16px;
+      gap:6px;
+    }
+    .trust-item{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:4px;
+      flex:1;
+    }
+    .t-icon{
+      width:26px; height:26px;
+      background:#FFF7ED;
+      border-radius:7px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .t-icon svg{ width:14px; height:14px; }
+    .trust-item span{
+      font-size:0.6rem;
+      color:#6B7280;
+      text-align:center;
+      font-weight:500;
+      line-height:1.3;
+    }
+
+    .divider{ height:1px; background:#F3F4F6; margin:16px 0 12px; }
+
+    .card-footer{
+      text-align:center;
+      font-size:0.76rem;
+      color:#6B7280;
+    }
+    .card-footer a{
+      color:#F97316;
+      font-weight:700;
+      text-decoration:none;
+    }
+    .card-footer a:hover{ text-decoration:underline; }
+
+    /* Mobile tweaks */
+    @media (max-width: 768px){
+      .nav-links{ display:none; }
+      .card{ width:100%; padding:26px 20px 22px; }
+      .center{ padding-top: 20px; }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="rain-canvas"></canvas>
+
+  <div class="layout">
+    <nav>
+      <a class="logo" href="trustpay_mobile_dash.html">
+        <span class="logo-icon"></span>
+        TrustPay
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="trustpay_mobile_wallet.html" class="has-arrow">Wallet</a></li>
+        <li><a href="payments.html" class="has-arrow">Payments</a></li>
+        <li><a href="trustpay_subscription_v3.html" class="has-arrow">Subscription</a></li>
+        <li><a href="trustpay_rewards_v4.html">Rewards</a></li>
+        <li><a href="aboutus.html">About us</a></li>
+      </ul>
+
+      <div class="nav-right">
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
+          <svg id="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg id="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <div class="center">
+      <div class="card">
+        <div class="card-logo">
+          <span class="card-logo-icon"></span>
+          <span class="card-logo-text">TrustPay</span>
+        </div>
+
+        <h1>Secure Access to <span>TrustPay</span></h1>
+        <p class="card-subtitle">Real-time fraud &amp; AML screening without slowing payments</p>
+
+        <div class="field">
+          <label for="email">Email or Work ID</label>
+          <div class="input-wrap">
+            <input type="email" id="email" placeholder="you@company.com" autocomplete="email" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <input type="password" id="password" placeholder="" autocomplete="current-password" />
+            <button class="eye-btn" onclick="togglePwd()" type="button" aria-label="Show or hide password">
+              <svg id="eye-icon" viewBox="0 0 24 24" width="17" height="17" fill="currentColor">
+                <path d="M12 5C7 5 2.73 8.11 1 12.5 2.73 16.89 7 20 12 20s9.27-3.11 11-7.5C21.27 8.11 17 5 12 5zm0 12.5a5 5 0 110-10 5 5 0 010 10zm0-8a3 3 0 100 6 3 3 0 000-6z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="options">
+          <label class="checkbox-label">
+            <input type="checkbox" id="remember" />
+            Remember this device
+          </label>
+          <a href="#" class="forgot">Forgot password?</a>
+        </div>
+
+        <button class="btn-login" type="button">
+          <svg viewBox="0 0 24 24">
+            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+          </svg>
+          Login Securely
+        </button>
+
+        <div class="trust-row">
+          <div class="trust-item">
+            <div class="t-icon">
+              <svg viewBox="0 0 24 24" fill="#F97316">
+                <path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6L12 2zm-2 14l-4-4 1.41-1.41L10 13.17l6.59-6.59L18 8l-8 8z"/>
+              </svg>
+            </div>
+            <span>RBI PAPG<br/>Aligned</span>
+          </div>
+
+          <div class="trust-item">
+            <div class="t-icon">
+              <svg viewBox="0 0 24 24" fill="#F97316">
+                <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+              </svg>
+            </div>
+            <span>Bank-Grade<br/>Encryption</span>
+          </div>
+
+          <div class="trust-item">
+            <div class="t-icon">
+              <svg viewBox="0 0 24 24" fill="#F97316">
+                <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
+              </svg>
+            </div>
+            <span>Real-time<br/>AML Checks</span>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <p class="card-footer">New organization? <a href="#">Request access</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Sharper canvas on mobile (HiDPI): draw in CSS pixels but size backing store by devicePixelRatio
+    var canvas = document.getElementById('rain-canvas');
+    var ctx = canvas.getContext('2d', { alpha: true });
+
+    var SYMS = ['₹','£','€','¥','₩','₦','Ƀ','$','₽','¢','₴','₫','₣','₱','₪','₮','₳','₲','₸','₻'];
+    var FS = 20;
+    var COLW = 26;
+    var LINEH = 22;
+    var TRAIL = 22;
+
+    var W, H, dpr, streams;
+
+    function rand(a,b){ return a + Math.random()*(b-a); }
+    function ri(a,b){ return Math.floor(rand(a,b)); }
+    function randSym(){ return SYMS[ri(0, SYMS.length)]; }
+
+    function init(){
+      dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      W = window.innerWidth;
+      H = window.innerHeight;
+
+      canvas.style.width = W + 'px';
+      canvas.style.height = H + 'px';
+      canvas.width = Math.floor(W * dpr);
+      canvas.height = Math.floor(H * dpr);
+
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      var cols = Math.floor(W / COLW);
+      streams = [];
+      for (var i=0; i<cols; i++) streams.push(mkStream(i, true));
+    }
+
+    function mkStream(col, scatter){
+      var trail = [];
+      for (var i=0; i<TRAIL; i++) trail.push(randSym());
+      return {
+        x: col * COLW + COLW * 0.5,
+        headY: scatter ? rand(-H*0.5, H*1.2) : rand(-TRAIL*LINEH*1.5, -LINEH),
+        speed: rand(0.60, 1.10),
+        baseOp: rand(0.55, 0.72),
+        trail: trail,
+        tick: 0,
+        swap: ri(110, 200)
+      };
+    }
+
+    function step(){
+      ctx.clearRect(0,0,W,H);
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = '600 ' + FS + 'px Inter, sans-serif';
+
+      for (var i=0; i<streams.length; i++){
+        var s = streams[i];
+        s.headY += s.speed;
+        s.tick++;
+
+        if (s.tick >= s.swap){
+          s.tick = 0;
+          s.trail.shift();
+          s.trail.push(randSym());
+          s.swap = ri(110, 200);
+        }
+
+        if (s.headY - TRAIL*LINEH > H){
+          streams[i] = mkStream(i, false);
+          continue;
+        }
+
+        for (var t=0; t<TRAIL; t++){
+          var y = s.headY - (TRAIL - 1 - t) * LINEH;
+          if (y < -LINEH || y > H + LINEH) continue;
+
+          var trailFactor = 0.50 + 0.50 * (t / (TRAIL - 1));
+          var screenFade = Math.min(1.0, Math.max(0, (H - y) / (H * 0.25)));
+          var enterFade = Math.min(1.0, y / (H * 0.07));
+          var op = s.baseOp * trailFactor * screenFade * enterFade;
+          if (op < 0.015) continue;
+
+          ctx.fillStyle = 'hsla(0,0%,42%,' + op.toFixed(3) + ')';
+          ctx.fillText(s.trail[t], s.x, y);
+        }
+      }
+      requestAnimationFrame(step);
+    }
+
+    init(); step();
+    var rt;
+    window.addEventListener('resize', function(){
+      clearTimeout(rt);
+      rt = setTimeout(init, 150);
+    });
+
+    function togglePwd(){
+      var inp = document.getElementById('password');
+      var icon = document.getElementById('eye-icon');
+      if (inp.type === 'password'){
+        inp.type = 'text';
+        icon.innerHTML = '<path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75C21.27 8.11 17 5 12 5c-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46A11.8 11.8 0 001 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>';
+      } else {
+        inp.type = 'password';
+        icon.innerHTML = '<path d="M12 5C7 5 2.73 8.11 1 12.5 2.73 16.89 7 20 12 20s9.27-3.11 11-7.5C21.27 8.11 17 5 12 5zm0 12.5a5 5 0 110-10 5 5 0 010 10zm0-8a3 3 0 100 6 3 3 0 000-6z"/>';
+      }
+    }
+
+    function toggleTheme(){
+      document.body.classList.toggle('dark');
+      var isDark = document.body.classList.contains('dark');
+      localStorage.setItem('trustpay_theme', isDark ? 'dark' : 'light');
+      document.getElementById('theme-icon-moon').style.display = isDark ? 'none' : 'block';
+      document.getElementById('theme-icon-sun').style.display = isDark ? 'block' : 'none';
+    }
+
+    (function(){
+      var savedTheme = localStorage.getItem('trustpay_theme');
+      if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)){
+        document.body.classList.add('dark');
+        var moon = document.getElementById('theme-icon-moon');
+        var sun = document.getElementById('theme-icon-sun');
+        if (moon) moon.style.display = 'none';
+        if (sun) sun.style.display = 'block';
+      }
+    })();
+  </script>
+</body>
+</html>

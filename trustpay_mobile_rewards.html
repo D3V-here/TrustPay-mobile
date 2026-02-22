@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="view-transition" content="same-origin" />
+  <title>TrustPay – Rewards</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --sat: env(safe-area-inset-top, 0px);
+      --sar: env(safe-area-inset-right, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --sal: env(safe-area-inset-left, 0px);
+      --bn-h: 70px;
+    }
+
+    html,
+    body {
+      height: 100%;
+      font-family: 'Inter', sans-serif;
+      background: #F1F3F5;
+      color: #111;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body {
+      min-height: 100svh;
+      overflow-x: hidden;
+      -webkit-text-size-adjust: 100%;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* ── PAGE ── */
+    .page {
+      max-width: 920px;
+      margin: 0 auto;
+      padding:
+        18px calc(16px + var(--sar)) calc(18px + var(--bn-h) + var(--sab)) calc(16px + var(--sal));
+    }
+
+    .page-header {
+      margin-bottom: 14px;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 900;
+      color: #111;
+      letter-spacing: -0.02em;
+    }
+
+    .page-subtitle {
+      font-size: 0.86rem;
+      color: #6B7280;
+      margin-top: 6px;
+      line-height: 1.55;
+    }
+
+    /* Switcher */
+    .account-switcher {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      border-radius: 14px;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+      width: fit-content;
+    }
+
+    .switcher-label {
+      font-size: 0.78rem;
+      color: #9CA3AF;
+      font-weight: 600;
+    }
+
+    .switcher-tabs {
+      display: flex;
+      gap: 4px;
+      background: #F3F4F6;
+      border-radius: 10px;
+      padding: 3px;
+    }
+
+    body.dark .switcher-tabs {
+      background: #2a2a2a;
+    }
+
+    .switcher-tab {
+      border: none;
+      background: transparent;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #6B7280;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .2s;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .switcher-tab.active {
+      background: #fff;
+      color: #F97316;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.12);
+    }
+
+    body.dark .switcher-tab.active {
+      background: #3a3a3a;
+      color: #F97316;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Stats row (mobile friendly) */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .stat-card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      padding: 14px 14px;
+    }
+
+    body.dark .stat-card {
+      background: #1e1e1e;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: #9CA3AF;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #111;
+    }
+
+    .stat-sub {
+      font-size: 0.72rem;
+      color: #6B7280;
+      margin-top: 2px;
+    }
+
+    body.dark .stat-value {
+      color: #eaeaea;
+    }
+
+    body.dark .stat-sub {
+      color: #9CA3AF;
+    }
+
+    .stat-span-2 {
+      grid-column: span 2;
+    }
+
+    /* Cards */
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.04);
+      padding: 18px 16px 16px;
+    }
+
+    body.dark .card {
+      background: #1e1e1e;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .stack {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    /* TP balance card */
+    .tp-balance-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tp-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: #FFF7ED;
+      color: #C05621;
+      font-size: 0.68rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .tp-badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #F97316;
+    }
+
+    .tp-label {
+      font-size: 0.8rem;
+      color: #6B7280;
+      font-weight: 700;
+    }
+
+    .tp-amount-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin: 4px 0 10px;
+    }
+
+    .tp-amount {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #111;
+      letter-spacing: -0.03em;
+    }
+
+    .tp-unit {
+      font-size: 0.9rem;
+      color: #6B7280;
+      font-weight: 700;
+    }
+
+    body.dark .tp-label,
+    body.dark .tp-unit {
+      color: #9CA3AF;
+    }
+
+    body.dark .tp-amount {
+      color: #eaeaea;
+    }
+
+    .tp-tier-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .tp-tier-chip.parental {
+      background: #EFF6FF;
+      color: #1D4ED8;
+    }
+
+    .tp-tier-chip.business {
+      background: #F0FDF4;
+      color: #166534;
+    }
+
+    .tp-tier-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0.9;
+    }
+
+    .tp-progress-label {
+      font-size: 0.76rem;
+      color: #6B7280;
+      margin-bottom: 6px;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+
+    .tp-progress-bar {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: #E5E7EB;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+
+    .tp-progress-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #F97316, #EA580C);
+      transition: width .5s ease;
+    }
+
+    .tp-progress-caption {
+      font-size: 0.74rem;
+      color: #9CA3AF;
+      line-height: 1.5;
+    }
+
+    .earn-rate-chip {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #FFF7ED, #FFEDD5);
+      border: 1px solid #FED7AA;
+      font-size: 0.78rem;
+      color: #9A3412;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      line-height: 1.3;
+    }
+
+    .tp-footer-note {
+      margin-top: 12px;
+      font-size: 0.74rem;
+      color: #9CA3AF;
+      line-height: 1.6;
+    }
+
+    /* Earn lists */
+    .tp-earn-card h3 {
+      font-size: 0.95rem;
+      font-weight: 900;
+      color: #111;
+      margin-bottom: 10px;
+    }
+
+    body.dark .tp-earn-card h3 {
+      color: #eaeaea;
+    }
+
+    .earn-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .earn-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 0;
+      border-bottom: 1px solid #F3F4F6;
+    }
+
+    body.dark .earn-item {
+      border-bottom-color: #3f3f46;
+    }
+
+    .earn-main {
+      font-size: 0.84rem;
+      color: #374151;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .earn-tag {
+      font-size: 0.72rem;
+      color: #9CA3AF;
+      margin-top: 2px;
+      line-height: 1.35;
+    }
+
+    body.dark .earn-main {
+      color: #eaeaea;
+    }
+
+    .earn-value {
+      font-size: 0.86rem;
+      font-weight: 900;
+      color: #10B981;
+      white-space: nowrap;
+    }
+
+    /* Redeem */
+    .redeem-card h3 {
+      font-size: 0.95rem;
+      font-weight: 900;
+      color: #111;
+      margin-bottom: 4px;
+    }
+
+    body.dark .redeem-card h3 {
+      color: #eaeaea;
+    }
+
+    .redeem-sub {
+      font-size: 0.8rem;
+      color: #6B7280;
+      margin-bottom: 12px;
+      line-height: 1.55;
+    }
+
+    body.dark .redeem-sub {
+      color: #9CA3AF;
+    }
+
+    .reward-section {
+      display: none;
+    }
+
+    .reward-section.visible {
+      display: block;
+    }
+
+    .reward-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .reward-pill {
+      padding: 14px 12px 12px;
+      border-radius: 14px;
+      border: 1.5px solid #E5E7EB;
+      background: #F9FAFB;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      transition: border-color .15s, background .15s, transform .15s, box-shadow .15s;
+      user-select: none;
+    }
+
+    .reward-pill:active {
+      transform: translateY(1px);
+    }
+
+    .reward-title {
+      font-weight: 900;
+      color: #111827;
+      font-size: 0.9rem;
+    }
+
+    .reward-meta {
+      font-size: 0.76rem;
+      color: #6B7280;
+      line-height: 1.35;
+    }
+
+    .reward-cost {
+      font-size: 0.8rem;
+      color: #F97316;
+      font-weight: 900;
+      margin-top: 6px;
+    }
+
+    .reward-equiv {
+      font-size: 0.72rem;
+      color: #9CA3AF;
+    }
+
+    body.dark .reward-pill {
+      background: #2a2a2a;
+      border-color: #3f3f46;
+    }
+
+    body.dark .reward-title {
+      color: #eaeaea;
+    }
+
+    body.dark .reward-meta,
+    body.dark .reward-equiv {
+      color: #9CA3AF;
+    }
+
+    .redeem-info {
+      font-size: 0.74rem;
+      color: #9CA3AF;
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    /* History */
+    .history-card h3 {
+      font-size: 0.95rem;
+      font-weight: 900;
+      margin-bottom: 10px;
+      color: #111;
+    }
+
+    body.dark .history-card h3 {
+      color: #eaeaea;
+    }
+
+    .history-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .history-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 0;
+      border-bottom: 1px solid #F3F4F6;
+    }
+
+    body.dark .history-row {
+      border-bottom-color: #3f3f46;
+    }
+
+    .history-row:last-child {
+      border-bottom: none;
+    }
+
+    .h-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .h-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .h-dot.earn {
+      background: #22C55E;
+    }
+
+    .h-dot.spend {
+      background: #EF4444;
+    }
+
+    .h-main {
+      font-size: 0.84rem;
+      color: #374151;
+      font-weight: 800;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 62vw;
+    }
+
+    body.dark .h-main {
+      color: #eaeaea;
+    }
+
+    .h-meta {
+      color: #9CA3AF;
+      font-size: 0.74rem;
+      margin-top: 1px;
+      line-height: 1.3;
+    }
+
+    .h-points {
+      font-weight: 900;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .h-points.plus {
+      color: #16A34A;
+    }
+
+    .h-points.minus {
+      color: #DC2626;
+    }
+
+
+    /* Bottom nav */
+    .bottom-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 120;
+
+      background: rgba(235, 235, 235, 0.92);
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+
+      padding: 10px calc(12px + var(--sar)) calc(10px + var(--sab)) calc(12px + var(--sal));
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+
+    .bn-item {
+      text-decoration: none;
+      color: #444;
+      font-weight: 900;
+      font-size: 0.86rem;
+      padding: 12px 10px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .bn-item.active {
+      color: #F97316;
+      background: rgba(249, 115, 22, 0.10);
+    }
+
+    body.dark .bottom-nav {
+      background: rgba(18, 18, 18, 0.92);
+      border-top-color: rgba(255, 255, 255, 0.06);
+    }
+
+    body.dark .bn-item {
+      color: #d1d5db;
+    }
+
+    body.dark .bn-item.active {
+      color: #F97316;
+      background: rgba(249, 115, 22, 0.14);
+    }
+  </style>
+</head>
+
+<body>
+
+
+  <main class="page">
+    <div class="page-header">
+      <div class="page-title">Tpoints Rewards</div>
+      <div class="page-subtitle">
+        Earn 5 Tpoints for every ₹1,000 transaction — available on Parental and Business plans.
+      </div>
+    </div>
+
+    <div class="account-switcher">
+      <span class="switcher-label">Viewing as:</span>
+      <div class="switcher-tabs">
+        <button class="switcher-tab active" id="tab-parent" type="button"
+          onclick="switchAccount('parent')">Parental</button>
+        <button class="switcher-tab" id="tab-org" type="button" onclick="switchAccount('org')">Organization</button>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Total earned</div>
+        <div class="stat-value" id="stat-earned">6,200</div>
+        <div class="stat-sub">Tpoints lifetime</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Current balance</div>
+        <div class="stat-value" id="stat-balance">4,250</div>
+        <div class="stat-sub">Available to redeem</div>
+      </div>
+      <div class="stat-card stat-span-2">
+        <div class="stat-label">Redeemed</div>
+        <div class="stat-value" id="stat-redeemed">1,950</div>
+        <div class="stat-sub">Tpoints used so far</div>
+      </div>
+    </div>
+
+    <div class="stack">
+      <section class="card tp-balance-card">
+        <div class="tp-badge"><span class="tp-badge-dot"></span>Trust points balance</div>
+
+        <div class="tp-label">Current Tpoints</div>
+        <div class="tp-amount-row">
+          <span class="tp-amount" id="balance-amount">4,250</span>
+          <span class="tp-unit">Tpoints</span>
+        </div>
+
+        <div class="tp-tier-chip parental" id="tier-chip">
+          <span class="tp-tier-dot"></span>
+          <span id="tier-label">Parental tier</span>
+        </div>
+
+        <div class="tp-progress-label" id="progress-label">
+          You are 1,750 Tpoints away from Business upgrade benefits.
+        </div>
+        <div class="tp-progress-bar">
+          <div class="tp-progress-fill" id="progress-fill" style="width:70.8%"></div>
+        </div>
+        <div class="tp-progress-caption" id="progress-caption">
+          Reach 6,000 Tpoints to unlock Business-equivalent rewards for 1 month.
+        </div>
+
+        <div class="earn-rate-chip">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#EA580C" aria-hidden="true">
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+          </svg>
+          <span id="earn-rate-text">Earn rate: 5 Tpoints per ₹1,000 transaction</span>
+        </div>
+
+        <p class="tp-footer-note">
+          Tpoints are earned only on <strong>Parental</strong> and <strong>Business</strong> subscriptions.
+          One-time users can view rewards and redeem via gift links but do not earn points.
+        </p>
+      </section>
+
+      <section class="card tp-earn-card">
+        <h3 id="earn-title">How you earn Tpoints (Parental)</h3>
+
+        <ul class="earn-list" id="earn-list-parental">
+          <li class="earn-item">
+            <div>
+              <div class="earn-main">Parental plan renewal</div>
+              <div class="earn-tag">Every successful monthly renewal</div>
+            </div>
+            <div class="earn-value">+250</div>
+          </li>
+          <li class="earn-item">
+            <div>
+              <div class="earn-main">Family transactions</div>
+              <div class="earn-tag">5 Tpoints per ₹1,000 spent</div>
+            </div>
+            <div class="earn-value">+5 / ₹1k</div>
+          </li>
+          <li class="earn-item">
+            <div>
+              <div class="earn-main">On-time bill payments</div>
+              <div class="earn-tag">Paid 3 days before due date</div>
+            </div>
+            <div class="earn-value">+25</div>
+          </li>
+          <li class="earn-item">
+            <div>
+              <div class="earn-main">Referral bonus</div>
+              <div class="earn-tag">When a friend joins Parental plan</div>
+            </div>
+            <div class="earn-value">+150</div>
+          </li>
+          <li class="earn-item">
+            <div>
+              <div class="earn-main">Monthly streak bonus</div>
+              <div class="earn-tag">3 months continuous subscription</div>
+            </div>
+            <div class="earn-value">+100</div>
+          </li>
+        </ul>
+
+        <ul class="earn-list" id="earn-list-org" style="display:none">
+          <li class="earn-item">
+            <div>
+              <div class="earn-main">Business plan renewal</div>
+              <div class="earn-tag">Every successful monthly billing</div>
+            </div>
+            <div class="earn-value">+750</div>
+          </li>
+          <li class="earn-item">
+            <div>
+              <div class="earn-main">Organization transactions</div>
+              <div class="earn-tag">5 Tpoints per ₹1,000 processed</div>
+            </div>
+            <div class="earn-value">+5 / ₹1k</div>
+          </li>
+          <li class="earn-item">
+            <div>
+              <div class="earn-main">Bulk payment bonus</div>
+              <div class="earn-tag">Per ₹1,00,000 in a single cycle</div>
+            </div>
+            <div class="earn-value">+500</div>
+          </li>
+          <li class="earn-item">
+            <div>
+              <div class="earn-main">On-time payroll processing</div>
+              <div class="earn-tag">All employees paid on schedule</div>
+            </div>
+            <div class="earn-value">+75</div>
+          </li>
+          <li class="earn-item">
+            <div>
+              <div class="earn-main">Annual plan bonus</div>
+              <div class="earn-tag">Switching to yearly billing</div>
+            </div>
+            <div class="earn-value">+2,000</div>
+          </li>
+        </ul>
+      </section>
+
+      <section class="card redeem-card">
+        <h3>Redeem your Tpoints</h3>
+        <p class="redeem-sub" id="redeem-sub">
+          Parental rewards unlock powerful family features. Costs reflect the 5 Tpoints = ₹1,000 earn rate.
+        </p>
+
+        <div class="reward-section visible" id="section-parental">
+          <div class="reward-grid">
+            <div class="reward-pill">
+              <span class="reward-title">Extra child account</span>
+              <span class="reward-meta">Valid for 1 month</span>
+              <span class="reward-cost">50 Tpoints</span>
+              <span class="reward-equiv">≈ ₹10,000 txn value</span>
+            </div>
+            <div class="reward-pill">
+              <span class="reward-title">Screen-time reports</span>
+              <span class="reward-meta">Detailed weekly insights</span>
+              <span class="reward-cost">35 Tpoints</span>
+              <span class="reward-equiv">≈ ₹7,000 txn value</span>
+            </div>
+            <div class="reward-pill">
+              <span class="reward-title">Spend alerts pack</span>
+              <span class="reward-meta">Real-time SMS for all kids</span>
+              <span class="reward-cost">25 Tpoints</span>
+              <span class="reward-equiv">≈ ₹5,000 txn value</span>
+            </div>
+            <div class="reward-pill">
+              <span class="reward-title">Education cashback</span>
+              <span class="reward-meta">Up to ₹250 on school fees</span>
+              <span class="reward-cost">75 Tpoints</span>
+              <span class="reward-equiv">≈ ₹15,000 txn value</span>
+            </div>
+            <div class="reward-pill">
+              <span class="reward-title">Priority support</span>
+              <span class="reward-meta">Skip-the-queue for 30 days</span>
+              <span class="reward-cost">30 Tpoints</span>
+              <span class="reward-equiv">≈ ₹6,000 txn value</span>
+            </div>
+            <div class="reward-pill">
+              <span class="reward-title">Family insights PDF</span>
+              <span class="reward-meta">Monthly expense breakdown</span>
+              <span class="reward-cost">20 Tpoints</span>
+              <span class="reward-equiv">≈ ₹4,000 txn value</span>
+            </div>
+          </div>
+          <p class="redeem-info">
+            All Parental rewards scale to the 5 Tpoints / ₹1,000 earn rate. One-time users may only redeem via gift
+            links.
+          </p>
+        </div>
+
+        <div class="reward-section" id="section-org">
+          <div class="reward-grid">
+            <div class="reward-pill">
+              <span class="reward-title">Extra sub-account</span>
+              <span class="reward-meta">1 additional org user, 1 month</span>
+              <span class="reward-cost">100 Tpoints</span>
+              <span class="reward-equiv">≈ ₹20,000 txn value</span>
+            </div>
+            <div class="reward-pill">
+              <span class="reward-title">Analytics dashboard</span>
+              <span class="reward-meta">Advanced org spending reports</span>
+              <span class="reward-cost">75 Tpoints</span>
+              <span class="reward-equiv">≈ ₹15,000 txn value</span>
+            </div>
+            <div class="reward-pill">
+              <span class="reward-title">Payroll fast-track</span>
+              <span class="reward-meta">Priority payroll processing</span>
+              <span class="reward-cost">50 Tpoints</span>
+              <span class="reward-equiv">≈ ₹10,000 txn value</span>
+            </div>
+            <div class="reward-pill">
+              <span class="reward-title">Fraud shield boost</span>
+              <span class="reward-meta">Enhanced monitoring for 30 days</span>
+              <span class="reward-cost">60 Tpoints</span>
+              <span class="reward-equiv">≈ ₹12,000 txn value</span>
+            </div>
+            <div class="reward-pill">
+              <span class="reward-title">Tax report export</span>
+              <span class="reward-meta">GST-ready quarterly export</span>
+              <span class="reward-cost">40 Tpoints</span>
+              <span class="reward-equiv">≈ ₹8,000 txn value</span>
+            </div>
+            <div class="reward-pill">
+              <span class="reward-title">Dedicated account mgr</span>
+              <span class="reward-meta">1 month dedicated support</span>
+              <span class="reward-cost">150 Tpoints</span>
+              <span class="reward-equiv">≈ ₹30,000 txn value</span>
+            </div>
+          </div>
+          <p class="redeem-info">
+            Organization rewards reflect higher transaction volumes at the same 5 Tpoints / ₹1,000 earn rate.
+          </p>
+        </div>
+      </section>
+
+      <section class="card history-card">
+        <h3>Recent Tpoints activity</h3>
+
+        <ul class="history-list" id="history-parental">
+          <li class="history-row">
+            <div class="h-left">
+              <span class="h-dot earn"></span>
+              <div>
+                <div class="h-main">Family transaction — ₹10,000</div>
+                <div class="h-meta">Today · Parental wallet</div>
+              </div>
+            </div>
+            <div class="h-points plus">+50</div>
+          </li>
+          <li class="history-row">
+            <div class="h-left">
+              <span class="h-dot earn"></span>
+              <div>
+                <div class="h-main">Parental plan renewed</div>
+                <div class="h-meta">3 days ago · Subscription</div>
+              </div>
+            </div>
+            <div class="h-points plus">+250</div>
+          </li>
+          <li class="history-row">
+            <div class="h-left">
+              <span class="h-dot spend"></span>
+              <div>
+                <div class="h-main">Redeemed: Extra child account</div>
+                <div class="h-meta">1 week ago · Reward</div>
+              </div>
+            </div>
+            <div class="h-points minus">-50</div>
+          </li>
+          <li class="history-row">
+            <div class="h-left">
+              <span class="h-dot earn"></span>
+              <div>
+                <div class="h-main">On-time bill payment</div>
+                <div class="h-meta">2 weeks ago · Utilities</div>
+              </div>
+            </div>
+            <div class="h-points plus">+25</div>
+          </li>
+          <li class="history-row">
+            <div class="h-left">
+              <span class="h-dot earn"></span>
+              <div>
+                <div class="h-main">Family transaction — ₹5,000</div>
+                <div class="h-meta">2 weeks ago · Parental wallet</div>
+              </div>
+            </div>
+            <div class="h-points plus">+25</div>
+          </li>
+        </ul>
+
+        <ul class="history-list" id="history-org" style="display:none">
+          <li class="history-row">
+            <div class="h-left">
+              <span class="h-dot earn"></span>
+              <div>
+                <div class="h-main">Org transaction — ₹50,000</div>
+                <div class="h-meta">Today · Organization wallet</div>
+              </div>
+            </div>
+            <div class="h-points plus">+250</div>
+          </li>
+          <li class="history-row">
+            <div class="h-left">
+              <span class="h-dot earn"></span>
+              <div>
+                <div class="h-main">Business plan renewed</div>
+                <div class="h-meta">5 days ago · Subscription</div>
+              </div>
+            </div>
+            <div class="h-points plus">+750</div>
+          </li>
+          <li class="history-row">
+            <div class="h-left">
+              <span class="h-dot spend"></span>
+              <div>
+                <div class="h-main">Redeemed: Analytics dashboard</div>
+                <div class="h-meta">1 week ago · Reward</div>
+              </div>
+            </div>
+            <div class="h-points minus">-75</div>
+          </li>
+          <li class="history-row">
+            <div class="h-left">
+              <span class="h-dot earn"></span>
+              <div>
+                <div class="h-main">On-time payroll processing</div>
+                <div class="h-meta">2 weeks ago · Payroll</div>
+              </div>
+            </div>
+            <div class="h-points plus">+75</div>
+          </li>
+          <li class="history-row">
+            <div class="h-left">
+              <span class="h-dot earn"></span>
+              <div>
+                <div class="h-main">Bulk payment bonus</div>
+                <div class="h-meta">3 weeks ago · Bulk cycle</div>
+              </div>
+            </div>
+            <div class="h-points plus">+500</div>
+          </li>
+        </ul>
+      </section>
+    </div>
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav" aria-label="Bottom navigation">
+    <a class="bn-item" href="trustpay_mobile_wallet.html">Wallet</a>
+    <a class="bn-item" href="trustpay_mobile_payments.html">Pay</a>
+    <a class="bn-item" href="trustpay_mobile_subscription.html">Plans</a>
+    <a class="bn-item active" href="trustpay_mobile_rewards.html">Rewards</a>
+    <a class="bn-item" href="aboutus.html">About</a>
+  </nav>
+
+  <script>
+    const data = {
+      parent: {
+        balance: '4,250', earned: '6,200', redeemed: '1,950',
+        tierClass: 'parental', tierLabel: 'Parental tier',
+        progressWidth: '70.8%',
+        progressLabel: 'You are 1,750 Tpoints away from Business upgrade benefits.',
+        progressCaption: 'Reach 6,000 Tpoints to unlock Business-equivalent rewards for 1 month.',
+        earnRate: 'Earn rate: 5 Tpoints per ₹1,000 transaction',
+        earnTitle: 'How you earn Tpoints (Parental)',
+        redeemSub: 'Parental rewards unlock powerful family features. Costs reflect the 5 Tpoints = ₹1,000 earn rate.'
+      },
+      org: {
+        balance: '12,800', earned: '21,500', redeemed: '8,700',
+        tierClass: 'business', tierLabel: 'Business tier',
+        progressWidth: '100%',
+        progressLabel: 'Business tier reached — all Business rewards are unlocked.',
+        progressCaption: 'Maintain an active Business plan to keep tier benefits.',
+        earnRate: 'Earn rate: 5 Tpoints per ₹1,000 transaction',
+        earnTitle: 'How you earn Tpoints (Organization)',
+        redeemSub: 'Organization rewards for higher transaction volumes. Same earn rate: 5 Tpoints = ₹1,000 processed.'
+      }
+    };
+
+    function switchAccount(type) {
+      const d = data[type];
+
+      document.getElementById('tab-parent').classList.toggle('active', type === 'parent');
+      document.getElementById('tab-org').classList.toggle('active', type === 'org');
+
+      document.getElementById('stat-balance').textContent = d.balance;
+      document.getElementById('stat-earned').textContent = d.earned;
+      document.getElementById('stat-redeemed').textContent = d.redeemed;
+
+      document.getElementById('balance-amount').textContent = d.balance;
+
+      const chip = document.getElementById('tier-chip');
+      chip.className = 'tp-tier-chip ' + d.tierClass;
+
+      document.getElementById('tier-label').textContent = d.tierLabel;
+      document.getElementById('progress-label').textContent = d.progressLabel;
+      document.getElementById('progress-fill').style.width = d.progressWidth;
+      document.getElementById('progress-caption').textContent = d.progressCaption;
+
+      document.getElementById('earn-rate-text').textContent = d.earnRate;
+      document.getElementById('earn-title').textContent = d.earnTitle;
+
+      document.getElementById('earn-list-parental').style.display = type === 'parent' ? 'flex' : 'none';
+      document.getElementById('earn-list-org').style.display = type === 'org' ? 'flex' : 'none';
+
+      document.getElementById('redeem-sub').textContent = d.redeemSub;
+
+      document.getElementById('section-parental').classList.toggle('visible', type === 'parent');
+      document.getElementById('section-org').classList.toggle('visible', type === 'org');
+
+      document.getElementById('history-parental').style.display = type === 'parent' ? 'flex' : 'none';
+      document.getElementById('history-org').style.display = type === 'org' ? 'flex' : 'none';
+    }
+  </script>
+
+
+
+</body>
+
+</html>

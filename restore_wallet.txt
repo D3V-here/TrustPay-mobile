@@ -1,0 +1,112 @@
+      </div>
+
+    </div>
+  </div>
+
+  <nav class="bottom-nav" aria-label="Bottom navigation">
+    <a class="bn-item active" href="trustpay_mobile_wallet.html">Wallet</a>
+    <a class="bn-item" href="trustpay_mobile_payments.html">Pay</a>
+    <a class="bn-item" href="trustpay_mobile_subscription.html">Plans</a>
+    <a class="bn-item" href="trustpay_mobile_rewards.html">Rewards</a>
+    <a class="bn-item" href="aboutus.html">About</a>
+  </nav>
+
+  <script>
+    var TXS = [
+      { name: 'Arun Kumar', desc: 'UPI Transfer', amount: +2500, time: '2 hours ago', type: 'received', color: '#6366F1', initials: 'AK' },
+      { name: 'Zomato', desc: 'Food Order #4821', amount: -340, time: 'Yesterday 1:30 PM', type: 'sent', color: '#EF4444', initials: 'Z' },
+      { name: 'Priya Sharma', desc: 'Money Request', amount: +1200, time: 'Yesterday 11 AM', type: 'received', color: '#8B5CF6', initials: 'PS' },
+      { name: 'Amazon Pay', desc: 'Shopping', amount: -899, time: '2 days ago', type: 'sent', color: '#F59E0B', initials: 'A' },
+      { name: 'HDFC Bank', desc: 'Credit Card Bill', amount: -5000, time: '3 days ago', type: 'sent', color: '#3B82F6', initials: 'HB' },
+      { name: 'Salary Credit', desc: 'Monthly Salary', amount: +45000, time: '1 week ago', type: 'received', color: '#22C55E', initials: 'SC' },
+      { name: 'Airtel', desc: 'Mobile Recharge', amount: -299, time: '1 week ago', type: 'sent', color: '#EC4899', initials: 'AI' },
+      { name: 'Swiggy', desc: 'Food Delivery', amount: -465, time: '2 weeks ago', type: 'sent', color: '#F97316', initials: 'SW' },
+    ];
+
+    function renderTx(filter) {
+      var list = document.getElementById('txList');
+      if(!list) return;
+      var data = filter === 'all' ? TXS : TXS.filter(function (t) { return t.type === filter; });
+      list.innerHTML = '';
+      data.forEach(function (tx, i) {
+        var pos = tx.amount > 0;
+        var sign = pos ? '+₹' : '-₹';
+        var abs = Math.abs(tx.amount).toLocaleString('en-IN');
+        var badge = pos ? '<span class="tx-badge success">Received</span>' : '<span class="tx-badge done">Completed</span>';
+        var row = '<div class="tx-row">' +
+          '<div class="tx-avatar" style="background:' + tx.color + '">' + tx.initials + '</div>' +
+          '<div class="tx-info"><div class="tx-name">' + tx.name + '</div><div class="tx-desc">' + tx.desc + '</div></div>' +
+          '<div class="tx-right"><div class="tx-amount ' + (pos ? 'pos' : 'neg') + '">' + sign + abs + '</div>' +
+          '<div class="tx-time">' + tx.time + '</div>' + badge + '</div></div>';
+        if (i < data.length - 1) row += '<div class="tx-divider"></div>';
+        list.innerHTML += row;
+      });
+    }
+
+    function filterTx(btn, filter) {
+      document.querySelectorAll('.tx-tab').forEach(function (t) { t.classList.remove('active'); });
+      if(btn) btn.classList.add('active');
+      renderTx(filter);
+    }
+    window.addEventListener('DOMContentLoaded', () => renderTx('all'));
+
+    var balVisible = false;
+    var eyeBtn = document.getElementById('eyeBtn');
+    if(eyeBtn) {
+      eyeBtn.addEventListener('click', function () {
+        balVisible = !balVisible;
+        document.getElementById('balAmount').classList.toggle('hidden', !balVisible);
+        document.getElementById('eyeIcon').innerHTML = balVisible
+          ? '<path d="M12 5C7 5 2.73 8.11 1 12.5 2.73 16.89 7 20 12 20s9.27-3.11 11-7.5C21.27 8.11 17 5 12 5zm0 12.5a5 5 0 110-10 5 5 0 010 10zm0-8a3 3 0 100 6 3 3 0 000-6z"/>'
+          : '<path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75C21.27 8.11 17 5 12 5c-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46A11.8 11.8 0 001 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>';
+      });
+    }
+
+    var checkBalBtn = document.getElementById('checkBalBtn');
+    if(checkBalBtn) {
+      checkBalBtn.addEventListener('click', function () {
+        balVisible = true;
+        document.getElementById('balAmount').classList.remove('hidden');
+        document.getElementById('eyeIcon').innerHTML = '<path d="M12 5C7 5 2.73 8.11 1 12.5 2.73 16.89 7 20 12 20s9.27-3.11 11-7.5C21.27 8.11 17 5 12 5zm0 12.5a5 5 0 110-10 5 5 0 010 10zm0-8a3 3 0 100 6 3 3 0 000-6z"/>';
+      });
+    }
+
+    function copyTextFallback(text) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) { }
+      document.body.removeChild(ta);
+    }
+
+    function copyUPI() {
+      var upi = 'dev@trustpay';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(upi).catch(function () { copyTextFallback(upi); });
+      } else {
+        copyTextFallback(upi);
+      }
+
+      var btn = document.getElementById('copyBtn');
+      if(btn) {
+        btn.textContent = '✓ Copied';
+        btn.classList.add('copied');
+        setTimeout(function () {
+          btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Copy';
+          btn.classList.remove('copied');
+        }, 2500);
+      }
+    }
+
+    function showToast(msg) {
+      console.log(msg); // Ignored to avoid UI bug
+    }
+
+    (function () {
+      var canvas = document.getElementById('qrCanvas');
+      if(!canvas) return;
+      var ctx = canvas.getContext('2d');

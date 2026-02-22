@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="view-transition" content="same-origin" />
+  <title>TrustPay – Plans</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --sat: env(safe-area-inset-top, 0px);
+      --sar: env(safe-area-inset-right, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --sal: env(safe-area-inset-left, 0px);
+      --bn-h: 70px;
+    }
+
+    html,
+    body {
+      height: 100%;
+      font-family: 'Inter', sans-serif;
+      background: #F1F3F5;
+      color: #111;
+    }
+
+    body {
+      min-height: 100svh;
+      overflow-x: hidden;
+      -webkit-text-size-adjust: 100%;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+
+    /* ── PAGE ── */
+    .page {
+      max-width: 860px;
+      margin: 0 auto;
+      padding:
+        22px calc(16px + var(--sar)) calc(18px + var(--bn-h) + var(--sab)) calc(16px + var(--sal));
+    }
+
+    .pricing-hero {
+      text-align: left;
+      margin-bottom: 18px;
+    }
+
+    .pricing-hero h1 {
+      font-size: 30px;
+      font-weight: 900;
+      color: #111;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+
+    .pricing-hero h1 span {
+      color: #F97316;
+    }
+
+    .pricing-hero p {
+      font-size: 0.92rem;
+      color: #6B7280;
+      line-height: 1.7;
+      max-width: 520px;
+    }
+
+    /* ── CARD STACK (mobile-first) ── */
+    .plans-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .plan-card {
+      background: #fff;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 20px;
+      padding: 20px 16px 16px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: transform .2s, box-shadow .2s;
+    }
+
+    .plan-card:active {
+      transform: translateY(1px);
+    }
+
+    .plan-card.orange-outline {
+      border: 1.5px solid rgba(249, 115, 22, .55);
+      box-shadow: 0 0 0 3px rgba(249, 115, 22, .08), 0 4px 20px rgba(249, 115, 22, .10);
+    }
+
+    .plan-card.orange-outline::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #F97316, transparent);
+    }
+
+
+    .plan-name {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #111;
+      margin-bottom: 6px;
+    }
+
+    .plan-desc {
+      font-size: 0.84rem;
+      color: #6B7280;
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+
+    /* Pricing */
+    .plan-old-price {
+      font-size: 0.92rem;
+      color: #9CA3AF;
+      text-decoration: line-through;
+      margin-bottom: 3px;
+    }
+
+    .plan-price-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      margin-bottom: 4px;
+    }
+
+    .plan-currency {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+
+    .plan-amount {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #111;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .plan-period {
+      font-size: 0.78rem;
+      color: #9CA3AF;
+      margin-bottom: 3px;
+    }
+
+    .plan-billing {
+      font-size: 0.74rem;
+      color: #9CA3AF;
+      margin-bottom: 14px;
+    }
+
+    /* Commission badge */
+    .commission-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #FFF7ED;
+      border: 1.5px solid #FED7AA;
+      border-radius: 12px;
+      padding: 11px 14px;
+      margin-bottom: 7px;
+    }
+
+    .commission-pct {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #F97316;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .commission-label .c-main {
+      font-size: 0.83rem;
+      font-weight: 800;
+      color: #111;
+      line-height: 1.3;
+    }
+
+    .commission-label .c-sub {
+      font-size: 0.72rem;
+      color: #9CA3AF;
+      margin-top: 2px;
+    }
+
+    .commission-note {
+      font-size: 0.72rem;
+      color: #9CA3AF;
+      margin-bottom: 14px;
+    }
+
+    .plan-divider {
+      height: 1px;
+      background: #F3F4F6;
+      margin: 12px 0 14px;
+    }
+
+    .plan-features-title {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #9CA3AF;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 10px;
+    }
+
+    .plan-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      margin-bottom: 14px;
+    }
+
+    .plan-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.84rem;
+      color: #374151;
+      line-height: 1.45;
+    }
+
+    .check-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .check-icon svg {
+      width: 10px;
+      height: 10px;
+    }
+
+    .check-gray {
+      background: #F3F4F6;
+    }
+
+    .check-orange {
+      background: rgba(249, 115, 22, .15);
+    }
+
+    .check-gray svg path {
+      stroke: #9CA3AF;
+    }
+
+    .check-orange svg path {
+      stroke: #F97316;
+    }
+
+    /* Buttons */
+    .btn-plan {
+      width: 100%;
+      padding: 13px;
+      border-radius: 12px;
+      font-size: 0.92rem;
+      font-weight: 900;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all .18s;
+      letter-spacing: .01em;
+      border: none;
+      user-select: none;
+    }
+
+    .btn-default {
+      background: #F3F4F6;
+      color: #374151;
+    }
+
+    .btn-default:active {
+      transform: translateY(1px);
+    }
+
+    .btn-orange {
+      background: #F97316;
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(249, 115, 22, .30);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-orange::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 0 0 36px 36px;
+      border-color: transparent transparent rgba(0, 0, 0, .18) transparent;
+      border-bottom-right-radius: 12px;
+    }
+
+    .btn-orange:active {
+      transform: translateY(1px);
+    }
+
+    .pricing-footer {
+      text-align: left;
+      margin-top: 18px;
+      font-size: 0.78rem;
+      color: #9CA3AF;
+      line-height: 1.7;
+    }
+
+    .pricing-footer a {
+      color: #F97316;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .pricing-footer a:hover {
+      text-decoration: underline;
+    }
+
+
+    /* Bottom nav (same idea as your mobile wallet/pay) */
+    .bottom-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 120;
+
+      background: rgba(235, 235, 235, 0.92);
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+
+      padding: 10px calc(12px + var(--sar)) calc(10px + var(--sab)) calc(12px + var(--sal));
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+
+    .bn-item {
+      text-decoration: none;
+      color: #444;
+      font-weight: 900;
+      font-size: 0.86rem;
+      padding: 12px 10px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .bn-item.active {
+      color: #F97316;
+      background: rgba(249, 115, 22, 0.10);
+    }
+
+    body.dark .bottom-nav {
+      background: rgba(18, 18, 18, 0.92);
+      border-top-color: rgba(255, 255, 255, 0.06);
+    }
+
+    body.dark .bn-item {
+      color: #d1d5db;
+    }
+
+    body.dark .bn-item.active {
+      color: #F97316;
+      background: rgba(249, 115, 22, 0.14);
+    }
+
+    /* Top Header */
+    .top-header {
+      background: rgba(235, 235, 235, 0.92);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: calc(12px + var(--sat)) calc(16px + var(--sar)) 12px calc(16px + var(--sal));
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 900;
+      font-size: 1.15rem;
+      color: #111;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 24px;
+      height: 28px;
+      background: #F97316;
+      clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    
+  </style>
+</head>
+
+<body>
+
+  <header class="top-header">
+    <a href="trustpay_mobile_dash.html" class="header-brand">
+      <span class="logo-icon"></span> TrustPay
+    </a>
+  </header>
+
+  <main class="page">
+    <div class="pricing-hero">
+      <h1>Simple, <span>flexible</span> pricing</h1>
+      <p>Choose the plan that fits your needs. From a single transaction to full enterprise control — pay only for what
+        you use.</p>
+    </div>
+
+    <div class="plans-grid">
+
+      <!-- ONE-TIME -->
+      <section class="plan-card" aria-label="One-Time plan">
+        <div class="plan-name">One-Time</div>
+        <div class="plan-desc">No subscription needed. Pay nothing upfront — we only take a small commission per
+          transaction.</div>
+
+        <div class="commission-badge">
+          <span class="commission-pct">0.5%</span>
+          <div class="commission-label">
+            <div class="c-main">per transaction</div>
+            <div class="c-sub">No monthly fee</div>
+          </div>
+        </div>
+        <div class="commission-note">e.g. ₹1,000 payment → only ₹5 commission</div>
+
+        <div class="plan-divider"></div>
+        <div class="plan-features-title">What’s included</div>
+        <ul class="plan-features">
+          <li><span class="check-icon check-gray"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>Single transaction processing</li>
+          <li><span class="check-icon check-gray"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>One-use QR code generation</li>
+          <li><span class="check-icon check-gray"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>Instant payment confirmation</li>
+          <li><span class="check-icon check-gray"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>Digital receipt via email &amp; SMS</li>
+          <li><span class="check-icon check-gray"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>Basic fraud &amp; AML screening</li>
+          <li><span class="check-icon check-gray"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>UPI, wallet &amp; card support</li>
+          <li><span class="check-icon check-gray"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>256-bit bank-grade encryption</li>
+          <li><span class="check-icon check-gray"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>Standard customer support</li>
+        </ul>
+        <button class="btn-plan btn-default" type="button">Get Started — Free</button>
+      </section>
+
+      <!-- PARENTAL -->
+      <section class="plan-card orange-outline" aria-label="Parental plan">
+        <div class="plan-name">Parental</div>
+        <div class="plan-desc">Built for families. Full control over who spends what, with real-time oversight for
+          parents.</div>
+
+        <div class="plan-old-price">₹799<span style="font-size:.75rem">/mo</span></div>
+        <div class="plan-price-row">
+          <span class="plan-currency">₹</span>
+          <span class="plan-amount">499</span>
+        </div>
+        <div class="plan-period">per month</div>
+        <div class="plan-billing">Billed monthly · Cancel anytime</div>
+
+        <div class="plan-divider"></div>
+        <div class="plan-features-title">What’s included</div>
+        <ul class="plan-features">
+          <li><span class="check-icon check-orange"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>Up to 5 family member accounts</li>
+          <li><span class="check-icon check-orange"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>Per-child spending limits &amp; controls</li>
+          <li><span class="check-icon check-orange"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>Real-time transaction alerts for parents</li>
+          <li><span class="check-icon check-orange"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>Joint &amp; individual wallet management</li>
+          <li><span class="check-icon check-orange"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>Monthly family spending reports</li>
+          <li><span class="check-icon check-orange"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>QR payments for all family members</li>
+          <li><span class="check-icon check-orange"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>Unlimited transactions (no commission)</li>
+          <li><span class="check-icon check-orange"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>Bank-grade AML &amp; fraud protection</li>
+          <li><span class="check-icon check-orange"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>UPI, wallet, card &amp; net banking</li>
+          <li><span class="check-icon check-orange"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>Priority customer support</li>
+        </ul>
+        <button class="btn-plan btn-orange" type="button">Get Started</button>
+      </section>
+
+      <!-- BUSINESS -->
+      <section class="plan-card orange-outline" aria-label="Business plan">
+        <div class="plan-name">Business</div>
+        <div class="plan-desc">Designed for organizations that need scale, compliance, and full API control.</div>
+
+        <div class="plan-old-price">₹3,499<span style="font-size:.75rem">/mo</span></div>
+        <div class="plan-price-row">
+          <span class="plan-currency">₹</span>
+          <span class="plan-amount">1,999</span>
+        </div>
+        <div class="plan-period">per month</div>
+        <div class="plan-billing">Billed monthly · Cancel anytime</div>
+
+        <div class="plan-divider"></div>
+        <div class="plan-features-title">What’s included</div>
+        <ul class="plan-features">
+          <li><span class="check-icon check-orange"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>Up to 50 user &amp; staff accounts</li>
+          <li><span class="check-icon check-orange"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>Unlimited transactions (no commission)</li>
+          <li><span class="check-icon check-orange"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>Business analytics dashboard</li>
+          <li><span class="check-icon check-orange"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>GST invoice auto-generation</li>
+          <li><span class="check-icon check-orange"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>Bulk &amp; batch payment processing</li>
+          <li><span class="check-icon check-orange"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>REST API &amp; webhook integration</li>
+          <li><span class="check-icon check-orange"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>Custom branded payment links</li>
+          <li><span class="check-icon check-orange"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>Dedicated account manager</li>
+          <li><span class="check-icon check-orange"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>Advanced fraud &amp; AML engine</li>
+          <li><span class="check-icon check-orange"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>RBI &amp; compliance audit reports</li>
+          <li><span class="check-icon check-orange"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>Multi-currency support</li>
+          <li><span class="check-icon check-orange"><svg viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></span>24/7 priority support &amp; SLA</li>
+        </ul>
+        <button class="btn-plan btn-orange" type="button">Contact Sales</button>
+      </section>
+
+    </div>
+
+    <div class="pricing-footer">
+      <p>All plans include 256-bit encryption and are RBI PAPG compliant. | <a href="#" onclick="return false;">View
+          full
+          comparison</a> | <a href="#" onclick="return false;">FAQs</a></p>
+      <p style="margin-top:5px">Prices are in Indian Rupees (₹). GST applicable as per government norms.</p>
+    </div>
+
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav" aria-label="Bottom navigation">
+    <a class="bn-item" href="trustpay_mobile_wallet.html">Wallet</a>
+    <a class="bn-item" href="trustpay_mobile_payments.html">Pay</a>
+    <a class="bn-item active" href="trustpay_mobile_subscription.html">Plans</a>
+    <a class="bn-item" href="trustpay_mobile_rewards.html">Rewards</a>
+    <a class="bn-item" href="aboutus.html">About</a>
+  </nav>
+
+
+
+</body>
+
+</html>
